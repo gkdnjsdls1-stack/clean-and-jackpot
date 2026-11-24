@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>방구석 로또 헌터 3D | Clean & Jackpot</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #canvas-container {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+    }
+    .hud-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      padding-top: calc(10px + var(--sat));
+      padding-bottom: calc(12px + var(--sab));
+    }
+    .interactive {
+      pointer-events: auto;
+    }
+    .glass {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+    .tier-glow-1 { box-shadow: 0 0 12px rgba(148, 163, 184, 0.3); }
+    .tier-glow-2 { box-shadow: 0 0 16px rgba(56, 189, 248, 0.45); border-color: rgba(56, 189, 248, 0.6); }
+    .tier-glow-3 { box-shadow: 0 0 20px rgba(168, 85, 247, 0.55); border-color: rgba(168, 85, 247, 0.7); }
+    .tier-glow-4 { box-shadow: 0 0 26px rgba(250, 204, 21, 0.7); border-color: rgba(250, 204, 21, 0.85); }
+    .touch-btn {
+      min-width: 44px;
+      min-height: 44px;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translate(-50%, 0) scale(0.9); }
+      30% { opacity: 1; transform: translate(-50%, -18px) scale(1.08); }
+      100% { opacity: 0; transform: translate(-50%, -56px) scale(0.95); }
+    }
+    .floating-text {
+      position: fixed;
+      z-index: 40;
+      pointer-events: none;
+      font-weight: 800;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.75);
+      animation: floatUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.82) translateY(12px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .pop-in {
+      animation: popIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+  </style>
+</head>
+<body class="text-white">
+  <div id="canvas-container"></div>
+
+  <div class="hud-layer flex flex-col justify-between px-3 sm:px-5">
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div class="interactive glass rounded-2xl px-3.5 py-2.5 flex items-center gap-3 shadow-xl">
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span id="house-badge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40">반지하 원룸</span>
+            <span id="prestige-badge" class="hidden text-[11px] font-bold px-2 py-0.5 rounded-full bg-fuchsia-500/25 text-fuchsia-200 border border-fuchsia-400/50">★ 환생 0</span>
+          </div>
+          <div class="text-xl sm:text-2xl font-black tracking-tight text-emerald-300 mt-0.5" id="money-display">₩0</div>
+          <div class="text-[11px] text-slate-300 flex items-center gap-2">
+            <span>청결도 <b id="clean-pct" class="text-sky-300">0%</b></span>
+            <span>·</span>
+            <span>티켓 <b id="ticket-count" class="text-amber-300">0</b>장</span>
+            <span>·</span>
+            <span>천장 <b id="pity-display" class="text-pink-300">0/6</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="interactive flex items-center gap-1.5 sm:gap-2">
+        <button id="btn-lotto" class="touch-btn glass rounded-2xl px-3 py-2 flex items-center gap-1.5 hover:bg-amber-500/20 border-amber-400/40 transition active:scale-95">
+          <span class="text-lg">🎫</span>
+          <span class="text-xs sm:text-sm font-bold text-amber-200">로또 (<span id="btn-ticket-num">0</span>)</span>
+        </button>
+        <button id="btn-shop" class="touch-btn glass rounded-2xl px-3 py-2 flex items-center gap-1.5 hover:bg-sky-500/20 transition active:scale-95">
+          <span class="text-lg">🛠️</span>
+          <span class="text-xs sm:text-sm font-bold">상점</span>
+        </button>
+        <button id="btn-dex" class="touch-btn glass rounded-2xl px-3 py-2 flex items-center gap-1.5 hover:bg-purple-500/20 transition active:scale-95">
+          <span class="text-lg">🏆</span>
+          <span class="text-xs sm:text-sm font-bold">도감</span>
+        </button>
+        <button id="btn-theme" class="touch-btn glass rounded-2xl px-3 py-2 flex items-center gap-1.5 hover:bg-emerald-500/20 transition active:scale-95">
+          <span class="text-lg">🎨</span>
+          <span class="text-xs sm:text-sm font-bold hidden sm:inline">테마</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center gap-2 pointer-events-none">
+      <div id="drone-banner" class="hidden interactive glass rounded-full px-4 py-1.5 text-xs font-bold text-amber-200 border border-amber-400/60 shadow-lg animate-bounce cursor-pointer">
+        🛸 황금 드론 출현! 클릭해서 보너스 받기
+      </div>
+      <div id="clean-progress-wrap" class="w-56 sm:w-72 glass rounded-full p-1">
+        <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+          <div id="clean-bar" class="h-full bg-gradient-to-r from-sky-400 to-emerald-400 transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+      <div id="hint-pill" class="glass rounded-full px-3.5 py-1 text-[11px] sm:text-xs text-slate-200">
+        쓰레기를 휴지통으로 드래그하거나 먼지·얼룩을 터치하세요!
+      </div>
+    </div>
+
+    <div class="flex justify-center">
+      <div id="tool-dock" class="interactive glass rounded-3xl p-1.5 sm:p-2 flex items-center gap-1.5 sm:gap-2 shadow-2xl overflow-x-auto max-w-full"></div>
+    </div>
+  </div>
+
+  <div id="modal-backdrop" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div id="modal-content" class="glass rounded-3xl w-full max-w-lg max-h-[86dvh] overflow-y-auto p-5 shadow-2xl pop-in"></div>
+  </div>
+
+  <div id="milestone-toast" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-50 glass rounded-2xl px-5 py-3 border-2 border-amber-400 shadow-2xl text-center pop-in pointer-events-none">
+    <div class="text-xs font-bold text-amber-300 uppercase tracking-wider">마일스톤 달성!</div>
+    <div id="milestone-title" class="text-base sm:text-lg font-black text-white mt-0.5"></div>
+    <div id="milestone-reward" class="text-xs text-emerald-300 font-semibold mt-0.5"></div>
+  </div>
+
+  <script>
+    (() => {
+      if (typeof THREE === 'undefined') {
+        document.body.innerHTML = '<div class="flex items-center justify-center h-screen bg-slate-900 text-white p-6 text-center"><div><h1 class="text-xl font-bold mb-2">3D 엔진을 불러오지 못했습니다</h1><p class="text-sm text-slate-300">인터넷 연결을 확인한 뒤 새로고침해 주세요.</p></div></div>';
+        return;
+      }
+
+      const HOUSE_TIERS = [
+        { id: 0, name: '반지하 원룸', cost: 0, mult: 1.0, floorColor: 0x475569, wallColor: 0x334155, size: 7.2 },
+        { id: 1, name: '역세권 오피스텔', cost: 15000, mult: 1.8, floorColor: 0x8d6e63, wallColor: 0xe2e8f0, size: 8.2 },
+        { id: 2, name: '한강뷰 아파트', cost: 80000, mult: 3.2, floorColor: 0xbcaaa4, wallColor: 0xf8fafc, size: 9.2 },
+        { id: 3, name: '스카이 펜트하우스', cost: 350000, mult: 6.0, floorColor: 0x1e293b, wallColor: 0x0f172a, size: 10.4 }
+      ];
+
+      const THEMES = [
+        { id: 'studio', name: '자취방', icon: '🛏️', unlockCost: 0, floor: 0x7c5c46, wall: 0xd6d3d1, accent: 0x38bdf8 },
+        { id: 'kids', name: '아이방', icon: '🧸', unlockCost: 8000, floor: 0xfde68a, wall: 0xbae6fd, accent: 0xf472b6 },
+        { id: 'castle', name: '중세 성', icon: '🏰', unlockCost: 25000, floor: 0x57534e, wall: 0x44403c, accent: 0xfacc15 },
+        { id: 'junk', name: '쓰레기방', icon: '🗑️', unlockCost: 45000, floor: 0x3f3f46, wall: 0x27272a, accent: 0xa3e635 },
+        { id: 'library', name: '도서관', icon: '📚', unlockCost: 90000, floor: 0x451a03, wall: 0x78350f, accent: 0xfbbf24 }
+      ];
+
+      const TOOLS = [
+        { id: 'hand', name: '손 정리', icon: '✋', target: 'trash', baseCost: 0, desc: '쓰레기를 집어 휴지통에 넣습니다' },
+        { id: 'duster', name: '먼지떨이', icon: '🪶', target: 'dust', baseCost: 500, desc: '선반과 구석 먼지를 털어냅니다' },
+        { id: 'vacuum', name: '청소기', icon: '🧹', target: 'clutter', baseCost: 2200, desc: '자잘한 잡동사니를 빠르게 흡입합니다' },
+        { id: 'mop', name: '물걸레', icon: '🧽', target: 'stain', baseCost: 5500, desc: '바닥 얼룩을 깨끗이 닦아냅니다' },
+        { id: 'magnifier', name: '돋보기', icon: '🔍', target: 'secret', baseCost: 12000, desc: '숨겨진 황금 티켓과 보물을 찾습니다' }
+      ];
+
+      const DECORS = [
+        { id: 'plant', name: '행운의 몬스테라', cost: 4000, icon: '🪴', bonus: '청소 보상 +15%' },
+        { id: 'lamp', name: '무드 플로어 램프', cost: 12000, icon: '🛋️', bonus: '드론 출현율 상승' },
+        { id: 'trophy', name: '황금 로또 트로피', cost: 50000, icon: '🏆', bonus: '로또 당첨금 +25%' }
+      ];
+
+      const PERKS = [
+        { id: 'combo', name: '연속 청소 달인', desc: '청소 수익 +35%', apply: (s) => { s.perkMult *= 1.35; } },
+        { id: 'lucky', name: '행운의 손끝', desc: '로또 당첨 확률 보정 +20%', apply: (s) => { s.lottoLuck += 0.2; } },
+        { id: 'rich', name: '알뜰 재테크', desc: '즉시 ₩8,000 + 이자 보너스', apply: (s) => { s.money += 8000; } }
+      ];
+
+      const MILESTONES = [
+        { id: 'm_1000', name: '첫 천 원의 기적', check: s => s.totalEarned >= 1000, rewardMoney: 500, rewardText: '+₩500 보너스' },
+        { id: 'm_clean1', name: '첫 대청소 완료', check: s => s.roomsCleaned >= 1, rewardMoney: 1500, rewardText: '+₩1,500 & 티켓 1장', rewardTicket: 1 },
+        { id: 'm_lotto', name: '첫 로또 당첨', check: s => s.lottoWins >= 1, rewardMoney: 3000, rewardText: '+₩3,000 보너스' },
+        { id: 'm_rich', name: '자산가 입문 (₩50,000)', check: s => s.totalEarned >= 50000, rewardMoney: 10000, rewardText: '+₩10,000 보너스' },
+        { id: 'm_master', name: '청소 마스터 (10회 완청)', check: s => s.roomsCleaned >= 10, rewardMoney: 25000, rewardText: '+₩25,000 & 황금 티켓 1장', rewardGolden: 1 }
+      ];
+
+      const DEFAULT_STATE = {
+        money: 0, totalEarned: 0, tickets: 1, goldenTickets: 0, pity: 0,
+        houseTier: 0, theme: 'studio', unlockedThemes: ['studio'],
+        tools: { hand: 1, duster: 0, vacuum: 0, mop: 0, magnifier: 0 },
+        decors: [], milestones: [], roomsCleaned: 0, lottoWins: 0,
+        bestJackpot: 0, prestige: 0, perkMult: 1.0, lottoLuck: 0
+      };
+
+      function sanitizeState(raw) {
+        const s = Object.assign({}, DEFAULT_STATE, raw || {});
+        s.money = Number.isFinite(s.money) && s.money >= 0 ? Math.floor(s.money) : 0;
+        s.totalEarned = Number.isFinite(s.totalEarned) && s.totalEarned >= 0 ? Math.floor(s.totalEarned) : 0;
+        s.tickets = Number.isFinite(s.tickets) && s.tickets >= 0 ? Math.floor(s.tickets) : 0;
+        s.goldenTickets = Number.isFinite(s.goldenTickets) && s.goldenTickets >= 0 ? Math.floor(s.goldenTickets) : 0;
+        s.pity = Number.isFinite(s.pity) ? Math.min(6, Math.max(0, Math.floor(s.pity))) : 0;
+        s.houseTier = Number.isFinite(s.houseTier) ? Math.min(HOUSE_TIERS.length - 1, Math.max(0, Math.floor(s.houseTier))) : 0;
+        s.tools = Object.assign({}, DEFAULT_STATE.tools, s.tools || {});
+        s.unlockedThemes = Array.isArray(s.unlockedThemes) && s.unlockedThemes.length ? s.unlockedThemes : ['studio'];
+        if (!s.unlockedThemes.includes(s.theme)) s.theme = 'studio';
+        s.decors = Array.isArray(s.decors) ? s.decors : [];
+        s.milestones = Array.isArray(s.milestones) ? s.milestones : [];
+        s.prestige = Number.isFinite(s.prestige) && s.prestige >= 0 ? Math.floor(s.prestige) : 0;
+        s.perkMult = Number.isFinite(s.perkMult) && s.perkMult >= 1 ? s.perkMult : 1.0;
+        s.lottoLuck = Number.isFinite(s.lottoLuck) && s.lottoLuck >= 0 ? s.lottoLuck : 0;
+        return s;
+      }
+
+      let state = sanitizeState(JSON.parse(localStorage.getItem('clean_jackpot_v3') || 'null'));
+      let activeTool = 'hand';
+
+      function saveState() {
+        try { localStorage.setItem('clean_jackpot_v3', JSON.stringify(state)); } catch (e) {}
+      }
+
+      const container = document.getElementById('canvas-container');
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0f172a);
+      scene.fog = new THREE.Fog(0x0f172a, 14, 30);
+
+      const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(6.5, 6.2, 7.2);
+      camera.lookAt(0, 0.8, 0);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+      const dirLight = new THREE.DirectionalLight(0xfffbeb, 0.9);
+      dirLight.position.set(6, 11, 5);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 1024;
+      dirLight.shadow.mapSize.height = 1024;
+      scene.add(dirLight);
+
+      let roomGroup = new THREE.Group();
+      scene.add(roomGroup);
+      let messItems = [], trashBin = null, trashLid = null, interactiveProps = [], droneMesh = null, droneActive = false;
+
+      const PARTICLE_CAP = 80;
+      const particlePool = [];
+      const particleGeo = new THREE.SphereGeometry(0.06, 6, 6);
+      for (let i = 0; i < PARTICLE_CAP; i++) {
+        const mat = new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0 });
+        const p = new THREE.Mesh(particleGeo, mat);
+        p.visible = false;
+        p.userData = { vel: new THREE.Vector3(), life: 0, maxLife: 0.6 };
+        scene.add(p);
+        particlePool.push(p);
+      }
+
+      function spawnParticles(pos, colorHex, count = 8) {
+        let spawned = 0;
+        for (let i = 0; i < particlePool.length && spawned < count; i++) {
+          const p = particlePool[i];
+          if (!p.visible) {
+            p.visible = true;
+            p.position.copy(pos);
+            p.material.color.setHex(colorHex);
+            p.material.opacity = 1;
+            p.userData.life = 0;
+            p.userData.maxLife = 0.45 + Math.random() * 0.25;
+            p.userData.vel.set((Math.random() - 0.5) * 3.5, 2 + Math.random() * 2.5, (Math.random() - 0.5) * 3.5);
+            spawned++;
+          }
+        }
+      }
+
+      function disposeGroup(group) {
+        group.traverse((obj) => {
+          if (obj.geometry) obj.geometry.dispose();
+          if (obj.material) {
+            if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+            else obj.material.dispose();
+          }
+        });
+      }
+
+      function buildRoom() {
+        disposeGroup(roomGroup);
+        scene.remove(roomGroup);
+        roomGroup = new THREE.Group();
+        scene.add(roomGroup);
+        messItems = [];
+        interactiveProps = [];
+
+        const tier = HOUSE_TIERS[state.houseTier];
+        const theme = THEMES.find(t => t.id === state.theme) || THEMES[0];
+        const s = tier.size;
+
+        const floor = new THREE.Mesh(
+          new THREE.BoxGeometry(s, 0.3, s),
+          new THREE.MeshStandardMaterial({ color: state.houseTier === 3 ? tier.floorColor : theme.floor, roughness: 0.8 })
+        );
+        floor.position.y = -0.15;
+        floor.receiveShadow = true;
+        roomGroup.add(floor);
+
+        const wallMat = new THREE.MeshStandardMaterial({ color: state.houseTier === 3 ? tier.wallColor : theme.wall, roughness: 0.9 });
+        const backWall = new THREE.Mesh(new THREE.BoxGeometry(s, 3.8, 0.25), wallMat);
+        backWall.position.set(0, 1.9, -s / 2);
+        backWall.receiveShadow = true;
+        roomGroup.add(backWall);
+
+        const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.25, 3.8, s), wallMat);
+        leftWall.position.set(-s / 2, 1.9, 0);
+        leftWall.receiveShadow = true;
+        roomGroup.add(leftWall);
+
+        const winFrame = new THREE.Mesh(
+          new THREE.BoxGeometry(2.0, 1.4, 0.15),
+          new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.35 })
+        );
+        winFrame.position.set(0.6, 2.2, -s / 2 + 0.14);
+        winFrame.userData = { propType: 'window', isNight: false };
+        roomGroup.add(winFrame);
+        interactiveProps.push(winFrame);
+
+        const bedGroup = new THREE.Group();
+        const bedBase = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.45, 1.4), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+        bedBase.position.y = 0.225;
+        bedBase.castShadow = true;
+        const mattress = new THREE.Mesh(new THREE.BoxGeometry(2.05, 0.22, 1.28), new THREE.MeshStandardMaterial({ color: theme.accent }));
+        mattress.position.y = 0.55;
+        bedGroup.add(bedBase, mattress);
+        bedGroup.position.set(-s / 2 + 1.4, 0, -s / 2 + 1.1);
+        bedGroup.userData = { propType: 'bed' };
+        roomGroup.add(bedGroup);
+        interactiveProps.push(bedGroup);
+
+        const drawer = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.0, 0.8), new THREE.MeshStandardMaterial({ color: 0x92400e }));
+        drawer.position.set(s / 2 - 1.0, 0.5, -s / 2 + 0.7);
+        drawer.castShadow = true;
+        drawer.userData = { propType: 'drawer' };
+        roomGroup.add(drawer);
+        interactiveProps.push(drawer);
+
+        const binGroup = new THREE.Group();
+        const binBody = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.34, 0.85, 16), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.4, roughness: 0.5 }));
+        binBody.position.y = 0.425;
+        binBody.castShadow = true;
+        trashLid = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0x38bdf8 }));
+        trashLid.position.y = 0.88;
+        binGroup.add(binBody, trashLid);
+        binGroup.position.set(s / 2 - 0.8, 0, s / 2 - 0.9);
+        roomGroup.add(binGroup);
+        trashBin = binGroup;
+
+        if (state.decors.includes('plant')) {
+          const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.2, 0.45, 12), new THREE.MeshStandardMaterial({ color: 0xb45309 }));
+          pot.position.set(-s / 2 + 0.7, 0.225, s / 2 - 0.8);
+          const leaf = new THREE.Mesh(new THREE.DodecahedronGeometry(0.42), new THREE.MeshStandardMaterial({ color: 0x16a34a }));
+          leaf.position.set(-s / 2 + 0.7, 0.72, s / 2 - 0.8);
+          leaf.userData = { propType: 'plant' };
+          roomGroup.add(pot, leaf);
+          interactiveProps.push(leaf);
+        }
+        if (state.decors.includes('lamp')) {
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 1.8, 8), new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8 }));
+          pole.position.set(-s / 2 + 2.8, 0.9, -s / 2 + 0.6);
+          const shade = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.4, 12), new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfde047, emissiveIntensity: 0.5 }));
+          shade.position.set(-s / 2 + 2.8, 1.85, -s / 2 + 0.6);
+          roomGroup.add(pole, shade);
+        }
+        if (state.decors.includes('trophy')) {
+          const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.12, 0.5, 12), new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.9, roughness: 0.2 }));
+          cup.position.set(s / 2 - 1.0, 1.25, -s / 2 + 0.7);
+          roomGroup.add(cup);
+        }
+
+        if (!droneMesh) {
+          droneMesh = new THREE.Mesh(
+            new THREE.OctahedronGeometry(0.35),
+            new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0xf59e0b, emissiveIntensity: 0.7, metalness: 0.8 })
+          );
+          droneMesh.visible = false;
+          scene.add(droneMesh);
+        }
+        spawnMessWave();
+      }
+
+      function spawnMessWave() {
+        const s = HOUSE_TIERS[state.houseTier].size - 1.6;
+        const totalCount = 12 + state.houseTier * 3;
+        const availableTypes = ['trash'];
+        if (state.tools.duster > 0) availableTypes.push('dust');
+        if (state.tools.vacuum > 0) availableTypes.push('clutter');
+        if (state.tools.mop > 0) availableTypes.push('stain');
+        if (state.tools.magnifier > 0) availableTypes.push('secret');
+
+        for (let i = 0; i < totalCount; i++) {
+          const kind = availableTypes[i % availableTypes.length];
+          let mesh;
+          if (kind === 'trash') {
+            mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.24), new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.9 }));
+            mesh.position.set((Math.random() - 0.5) * s, 0.24, (Math.random() - 0.5) * s);
+          } else if (kind === 'dust') {
+            mesh = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 8), new THREE.MeshStandardMaterial({ color: 0xcbd5e1, transparent: true, opacity: 0.85 }));
+            mesh.position.set((Math.random() - 0.5) * s, 0.22, (Math.random() - 0.5) * s);
+          } else if (kind === 'clutter') {
+            mesh = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.22, 0.36), new THREE.MeshStandardMaterial({ color: 0xf97316 }));
+            mesh.position.set((Math.random() - 0.5) * s, 0.14, (Math.random() - 0.5) * s);
+          } else if (kind === 'stain') {
+            mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.03, 14), new THREE.MeshStandardMaterial({ color: 0x713f12, roughness: 0.2 }));
+            mesh.position.set((Math.random() - 0.5) * s, 0.02, (Math.random() - 0.5) * s);
+          } else {
+            mesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.2), new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0xca8a04, emissiveIntensity: 0.5 }));
+            mesh.position.set((Math.random() - 0.5) * s, 0.25, (Math.random() - 0.5) * s);
+          }
+          mesh.castShadow = true;
+          mesh.userData = { messKind: kind, baseVal: kind === 'secret' ? 600 : 180 };
+          roomGroup.add(mesh);
+          messItems.push(mesh);
+        }
+        updateHUD();
+      }
+
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+      const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.35);
+      let draggedItem = null;
+
+      function setPointer(e) {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        pointer.x = (clientX / window.innerWidth) * 2 - 1;
+        pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+        return { x: clientX, y: clientY };
+      }
+
+      function showFloatingText(x, y, text, colorClass = 'text-emerald-300') {
+        const el = document.createElement('div');
+        el.className = `floating-text text-sm sm:text-base ${colorClass}`;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.textContent = text;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 920);
+      }
+
+      function autoSelectToolFor(kind) {
+        const tool = TOOLS.find(t => t.target === kind);
+        if (tool && state.tools[tool.id] > 0 && activeTool !== tool.id) {
+          activeTool = tool.id;
+          renderToolDock();
+        }
+      }
+
+      function collectMess(item, screenPos) {
+        const idx = messItems.indexOf(item);
+        if (idx === -1) return;
+        messItems.splice(idx, 1);
+
+        const tierMult = HOUSE_TIERS[state.houseTier].mult;
+        const toolLv = state.tools[TOOLS.find(t => t.target === item.userData.messKind)?.id || 'hand'] || 1;
+        const decorMult = state.decors.includes('plant') ? 1.15 : 1.0;
+        const prestigeMult = 1 + state.prestige * 0.5;
+        const reward = Math.round(item.userData.baseVal * tierMult * (1 + (toolLv - 1) * 0.35) * state.perkMult * decorMult * prestigeMult);
+
+        state.money += reward;
+        state.totalEarned += reward;
+        if (item.userData.messKind === 'secret') {
+          state.tickets += 1;
+          showFloatingText(screenPos.x, screenPos.y, `+₩${reward.toLocaleString()} & 🎫+1`, 'text-amber-300');
+        } else {
+          showFloatingText(screenPos.x, screenPos.y, `+₩${reward.toLocaleString()}`);
+        }
+
+        spawnParticles(item.position, item.userData.messKind === 'secret' ? 0xfacc15 : 0x38bdf8, 10);
+        roomGroup.remove(item);
+        if (item.geometry) item.geometry.dispose();
+        if (item.material) item.material.dispose();
+
+        checkMilestones();
+        if (messItems.length === 0) onRoomCleaned();
+        else { updateHUD(); saveState(); }
+      }
+
+      function onRoomCleaned() {
+        state.roomsCleaned += 1;
+        state.tickets += 1;
+        if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
+        checkMilestones();
+        saveState();
+        updateHUD();
+        openPerkModal();
+      }
+
+      function checkMilestones() {
+        MILESTONES.forEach(m => {
+          if (!state.milestones.includes(m.id) && m.check(state)) {
+            state.milestones.push(m.id);
+            state.money += m.rewardMoney || 0;
+            state.totalEarned += m.rewardMoney || 0;
+            state.tickets += m.rewardTicket || 0;
+            state.goldenTickets += m.rewardGolden || 0;
+            const toast = document.getElementById('milestone-toast');
+            document.getElementById('milestone-title').textContent = m.name;
+            document.getElementById('milestone-reward').textContent = m.rewardText;
+            toast.classList.remove('hidden');
+            if (typeof confetti === 'function') confetti({ particleCount: 90, spread: 80, origin: { y: 0.35 } });
+            setTimeout(() => toast.classList.add('hidden'), 3200);
+          }
+        });
+      }
+
+      renderer.domElement.addEventListener('pointerdown', (e) => {
+        const pos = setPointer(e);
+        raycaster.setFromCamera(pointer, camera);
+
+        if (droneActive && droneMesh && raycaster.intersectObject(droneMesh).length > 0) {
+          claimDrone(pos);
+          return;
+        }
+
+        const hits = raycaster.intersectObjects(messItems, false);
+        if (hits.length > 0) {
+          const item = hits[0].object;
+          autoSelectToolFor(item.userData.messKind);
+          if (item.userData.messKind === 'trash') draggedItem = item;
+          else collectMess(item, pos);
+          return;
+        }
+
+        const propHits = raycaster.intersectObjects(interactiveProps, true);
+        if (propHits.length > 0) {
+          let obj = propHits[0].object;
+          while (obj && !obj.userData.propType) obj = obj.parent;
+          if (obj) {
+            const t = obj.userData.propType;
+            if (t === 'bed') {
+              obj.scale.set(1.05, 1.15, 1.05);
+              setTimeout(() => obj.scale.set(1, 1, 1), 220);
+              state.money += 120;
+              showFloatingText(pos.x, pos.y, '침대 정리 +₩120', 'text-sky-300');
+            } else if (t === 'drawer') {
+              state.money += 150;
+              showFloatingText(pos.x, pos.y, '서랍 확인 +₩150', 'text-amber-200');
+            } else if (t === 'window') {
+              obj.userData.isNight = !obj.userData.isNight;
+              obj.material.color.setHex(obj.userData.isNight ? 0x1e293b : 0x38bdf8);
+              showFloatingText(pos.x, pos.y, obj.userData.isNight ? '🌙 야경 모드' : '☀️ 낮 모드', 'text-indigo-200');
+            } else if (t === 'plant') {
+              state.money += 200;
+              showFloatingText(pos.x, pos.y, '화분 물주기 +₩200', 'text-emerald-300');
+            }
+            updateHUD();
+            saveState();
+          }
+        }
+      });
+
+      renderer.domElement.addEventListener('pointermove', (e) => {
+        if (!draggedItem) return;
+        setPointer(e);
+        raycaster.setFromCamera(pointer, camera);
+        const intersectPoint = new THREE.Vector3();
+        if (raycaster.ray.intersectPlane(dragPlane, intersectPoint)) {
+          draggedItem.position.x = intersectPoint.x;
+          draggedItem.position.z = intersectPoint.z;
+          draggedItem.position.y = 0.65;
+          const dist = draggedItem.position.distanceTo(trashBin.position);
+          trashLid.position.y = dist < 1.6 ? 1.18 : 0.88;
+          trashLid.rotation.z = dist < 1.6 ? -0.35 : 0;
+        }
+      });
+
+      window.addEventListener('pointerup', (e) => {
+        if (!draggedItem) return;
+        const pos = setPointer(e);
+        if (draggedItem.position.distanceTo(trashBin.position) < 1.65) collectMess(draggedItem, pos);
+        else draggedItem.position.y = 0.24;
+        trashLid.position.y = 0.88;
+        trashLid.rotation.z = 0;
+        draggedItem = null;
+      });
+
+      function claimDrone(pos) {
+        droneActive = false;
+        droneMesh.visible = false;
+        document.getElementById('drone-banner').classList.add('hidden');
+        const bonus = 2500 * HOUSE_TIERS[state.houseTier].mult;
+        state.money += bonus;
+        state.totalEarned += bonus;
+        state.tickets += 1;
+        if (pos) showFloatingText(pos.x, pos.y, `🛸 +₩${bonus.toLocaleString()} & 🎫+1`, 'text-amber-300');
+        updateHUD();
+        saveState();
+      }
+      document.getElementById('drone-banner').addEventListener('click', () => claimDrone({ x: window.innerWidth / 2, y: window.innerHeight / 3 }));
+      setInterval(() => {
+        if (!droneActive && Math.random() < (state.decors.includes('lamp') ? 0.55 : 0.3)) {
+          droneActive = true;
+          droneMesh.visible = true;
+          document.getElementById('drone-banner').classList.remove('hidden');
+        }
+      }, 22000);
+
+      function renderToolDock() {
+        const dock = document.getElementById('tool-dock');
+        dock.innerHTML = '';
+        TOOLS.forEach(t => {
+          const lv = state.tools[t.id] || 0;
+          const isLocked = lv === 0;
+          const isSelected = activeTool === t.id;
+          const tierClass = lv >= 5 ? 'tier-glow-4' : lv >= 3 ? 'tier-glow-3' : lv >= 2 ? 'tier-glow-2' : 'tier-glow-1';
+          const btn = document.createElement('button');
+          btn.className = `touch-btn rounded-2xl px-3 py-1.5 flex flex-col items-center justify-center border transition shrink-0 ${
+            isLocked ? 'opacity-45 bg-slate-800/70 border-slate-700' :
+            isSelected ? `bg-sky-500/25 ${tierClass}` : `bg-slate-900/60 border-white/10 ${tierClass}`
+          }`;
+          btn.innerHTML = `<span class="text-lg leading-none">${isLocked ? '🔒' : t.icon}</span><span class="text-[11px] font-bold mt-1">${t.name}</span><span class="text-[10px] text-amber-300">${isLocked ? '미보유' : 'Lv.' + lv}</span>`;
+          btn.onclick = () => { if (isLocked) { openShopModal(); return; } activeTool = t.id; renderToolDock(); };
+          dock.appendChild(btn);
+        });
+      }
+
+      function updateHUD() {
+        document.getElementById('money-display').textContent = `₩${state.money.toLocaleString()}`;
+        document.getElementById('house-badge').textContent = HOUSE_TIERS[state.houseTier].name;
+        const pBadge = document.getElementById('prestige-badge');
+        if (state.prestige > 0) { pBadge.classList.remove('hidden'); pBadge.textContent = `★ 환생 ${state.prestige}`; }
+        document.getElementById('ticket-count').textContent = state.tickets;
+        document.getElementById('btn-ticket-num').textContent = state.tickets + state.goldenTickets;
+        document.getElementById('pity-display').textContent = `${state.pity}/6`;
+
+        const totalWave = 12 + state.houseTier * 3;
+        const pct = Math.max(0, Math.min(100, Math.round(((totalWave - messItems.length) / totalWave) * 100)));
+        document.getElementById('clean-pct').textContent = `${pct}%`;
+        document.getElementById('clean-bar').style.width = `${pct}%`;
+      }
+
+      const backdrop = document.getElementById('modal-backdrop');
+      const modalContent = document.getElementById('modal-content');
+      function openModal(html) { modalContent.innerHTML = html; backdrop.classList.remove('hidden'); }
+      function closeModal() { backdrop.classList.add('hidden'); }
+      backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+
+      function openPerkModal() {
+        openModal(`
+          <div class="text-center">
+            <div class="text-2xl mb-1">✨ 방 청소 완료!</div>
+            <p class="text-xs text-slate-300 mb-4">다음 방으로 넘어가기 전 보너스 퍽을 선택하세요 (+🎫1 획득)</p>
+            <div class="grid gap-2.5">
+              ${PERKS.map(p => `<button data-perk="${p.id}" class="perk-pick glass rounded-2xl p-3.5 text-left hover:bg-emerald-500/20 border border-emerald-400/30 transition"><div class="font-bold text-emerald-300">${p.name}</div><div class="text-xs text-slate-300 mt-0.5">${p.desc}</div></button>`).join('')}
+            </div>
+          </div>
+        `);
+        modalContent.querySelectorAll('.perk-pick').forEach(btn => {
+          btn.onclick = () => {
+            const perk = PERKS.find(x => x.id === btn.dataset.perk);
+            if (perk) perk.apply(state);
+            closeModal();
+            spawnMessWave();
+            saveState();
+          };
+        });
+      }
+
+      function openLottoModal() {
+        openModal(`
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-black text-amber-300">🎫 행운의 로또 센터</h2>
+            <button id="close-m" class="touch-btn text-slate-400 hover:text-white text-xl font-bold">✕</button>
+          </div>
+          <div class="glass rounded-2xl p-3 mb-3 text-xs flex flex-wrap justify-between gap-2">
+            <span>일반 티켓: <b class="text-amber-300">${state.tickets}장</b></span>
+            <span>황금 티켓: <b class="text-yellow-300">${state.goldenTickets}장</b></span>
+            <span>천장 게이지: <b class="text-pink-300">${state.pity}/6</b></span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <button id="play-scratch" class="touch-btn rounded-2xl bg-amber-500/25 border border-amber-400/50 p-3 font-bold text-sm hover:bg-amber-500/35">🪙 즉석 복권 (🎫1)</button>
+            <button id="play-645" class="touch-btn rounded-2xl bg-purple-500/25 border border-purple-400/50 p-3 font-bold text-sm hover:bg-purple-500/35">🎱 6/45 추첨 (🎫1)</button>
+            <button id="craft-gold" class="touch-btn rounded-2xl bg-yellow-500/20 border border-yellow-400/40 p-2.5 font-bold text-xs">✨ 일반 3장 → 황금 1장</button>
+            <button id="play-gold" class="touch-btn rounded-2xl bg-gradient-to-r from-amber-500/40 to-yellow-500/40 border border-yellow-300 p-2.5 font-bold text-xs">👑 황금 복권 (2.2배)</button>
+          </div>
+          <div id="lotto-stage" class="glass rounded-2xl p-4 text-center text-sm text-slate-300 min-h-[120px] flex items-center justify-center">원하는 복권을 선택해 행운을 시험해 보세요!</div>
+        `);
+        document.getElementById('close-m').onclick = closeModal;
+        const stage = document.getElementById('lotto-stage');
+        function runDraw(isGolden) {
+          if (isGolden) {
+            if (state.goldenTickets < 1) { stage.innerHTML = '<span class="text-rose-300">황금 티켓이 부족합니다!</span>'; return; }
+            state.goldenTickets -= 1;
+          } else {
+            if (state.tickets < 1) { stage.innerHTML = '<span class="text-rose-300">일반 티켓이 부족합니다!</span>'; return; }
+            state.tickets -= 1;
+          }
+          stage.innerHTML = '<div class="animate-pulse font-bold text-amber-200">행운의 번호를 추첨 중...</div>';
+          setTimeout(() => {
+            const guaranteed = state.pity >= 6;
+            const roll = Math.random() + state.lottoLuck;
+            let prize = 0, label = '아쉽지만 꽝!';
+            if (guaranteed || roll > 0.88) { prize = 30000; label = '🎉 1등 대박 당첨!'; state.pity = 0; state.lottoWins += 1; }
+            else if (roll > 0.55) { prize = 6500; label = '✨ 3등 당첨!'; state.pity = 0; state.lottoWins += 1; }
+            else if (roll > 0.28) { prize = 2000; label = '🍀 4등 당첨!'; state.pity = Math.min(6, state.pity + 1); state.lottoWins += 1; }
+            else { state.pity = Math.min(6, state.pity + 1); }
+
+            const finalPrize = Math.round(prize * (isGolden ? 2.2 : 1.0) * (state.decors.includes('trophy') ? 1.25 : 1.0) * HOUSE_TIERS[state.houseTier].mult);
+            if (finalPrize > 0) {
+              state.money += finalPrize;
+              state.totalEarned += finalPrize;
+              if (finalPrize > state.bestJackpot) state.bestJackpot = finalPrize;
+              if (typeof confetti === 'function') confetti({ particleCount: 80, spread: 75 });
+            }
+            const nums = Array.from({ length: 6 }, () => Math.floor(Math.random() * 45) + 1);
+            const bonusNum = Math.floor(Math.random() * 45) + 1;
+            stage.innerHTML = `
+              <div>
+                <div class="flex justify-center gap-1.5 mb-2 flex-wrap">
+                  ${nums.map(n => `<span class="w-7 h-7 rounded-full bg-sky-500/30 border border-sky-300 text-xs font-bold flex items-center justify-center">${n}</span>`).join('')}
+                  <span class="text-slate-400 self-center">+</span>
+                  <span class="w-7 h-7 rounded-full bg-amber-500/40 border border-amber-300 text-xs font-bold flex items-center justify-center">${bonusNum}</span>
+                </div>
+                <div class="text-base font-black ${finalPrize > 0 ? 'text-emerald-300' : 'text-slate-400'}">${label}</div>
+                ${finalPrize > 0 ? `<div class="text-sm font-bold text-amber-300 mt-0.5">+₩${finalPrize.toLocaleString()}</div>` : ''}
+              </div>
+            `;
+            checkMilestones();
+            updateHUD();
+            saveState();
+          }, 450);
+        }
+        document.getElementById('play-scratch').onclick = () => runDraw(false);
+        document.getElementById('play-645').onclick = () => runDraw(false);
+        document.getElementById('play-gold').onclick = () => runDraw(true);
+        document.getElementById('craft-gold').onclick = () => {
+          if (state.tickets >= 3) { state.tickets -= 3; state.goldenTickets += 1; openLottoModal(); updateHUD(); saveState(); }
+          else stage.innerHTML = '<span class="text-rose-300">일반 티켓이 3장 필요합니다!</span>';
+        };
+      }
+
+      function openShopModal() {
+        const nextHouse = HOUSE_TIERS[state.houseTier + 1];
+        openModal(`
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-black text-sky-300">🛠️ 장비 & 부동산 상점</h2>
+            <button id="close-m" class="touch-btn text-slate-400 hover:text-white text-xl font-bold">✕</button>
+          </div>
+          <div class="space-y-2.5 mb-4">
+            ${TOOLS.map(t => {
+              const lv = state.tools[t.id] || 0;
+              const cost = lv === 0 ? t.baseCost : Math.round((t.baseCost || 400) * Math.pow(1.65, lv));
+              return `<div class="glass rounded-2xl p-3 flex items-center justify-between gap-2"><div><div class="font-bold text-sm">${t.icon} ${t.name} <span class="text-xs text-amber-300">Lv.${lv}</span></div><div class="text-[11px] text-slate-300">${t.desc}</div></div><button data-tool="${t.id}" data-cost="${cost}" class="buy-tool touch-btn px-3 py-1.5 rounded-xl bg-sky-500/30 border border-sky-400/50 text-xs font-bold shrink-0">₩${cost.toLocaleString()}</button></div>`;
+            }).join('')}
+          </div>
+          <h3 class="text-sm font-bold text-emerald-300 mb-2">🏡 집 이사 & 럭셔리 가구</h3>
+          <div class="space-y-2">
+            ${nextHouse ? `<div class="glass rounded-2xl p-3 flex items-center justify-between"><div><div class="font-bold text-sm text-amber-300">이사: ${nextHouse.name}</div><div class="text-[11px] text-slate-300">모든 수익 ${nextHouse.mult}배 증가!</div></div><button id="buy-house" class="touch-btn px-3 py-1.5 rounded-xl bg-amber-500/30 border border-amber-400 text-xs font-bold">₩${nextHouse.cost.toLocaleString()}</button></div>`
+            : `<div class="glass rounded-2xl p-3 flex items-center justify-between border border-fuchsia-400/50"><div><div class="font-bold text-sm text-fuchsia-300">★ 환생 (프레스티지)</div><div class="text-[11px] text-slate-300">수익 영구 +50% 배지 획득 후 새로 시작</div></div><button id="do-prestige" class="touch-btn px-3 py-1.5 rounded-xl bg-fuchsia-500/30 border border-fuchsia-400 text-xs font-bold">환생하기</button></div>`}
+            ${DECORS.map(d => {
+              const owned = state.decors.includes(d.id);
+              return `<div class="glass rounded-2xl p-3 flex items-center justify-between"><div><div class="font-bold text-sm">${d.icon} ${d.name}</div><div class="text-[11px] text-slate-300">${d.bonus}</div></div><button data-decor="${d.id}" data-cost="${d.cost}" class="buy-decor touch-btn px-3 py-1.5 rounded-xl ${owned ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-500/30 border border-emerald-400'} text-xs font-bold" ${owned ? 'disabled' : ''}>${owned ? '보유중' : '₩' + d.cost.toLocaleString()}</button></div>`;
+            }).join('')}
+          </div>
+        `);
+        document.getElementById('close-m').onclick = closeModal;
+        modalContent.querySelectorAll('.buy-tool').forEach(btn => {
+          btn.onclick = () => {
+            const id = btn.dataset.tool, cost = Number(btn.dataset.cost);
+            if (state.money >= cost) { state.money -= cost; state.tools[id] = (state.tools[id] || 0) + 1; activeTool = id; renderToolDock(); updateHUD(); saveState(); openShopModal(); }
+          };
+        });
+        const houseBtn = document.getElementById('buy-house');
+        if (houseBtn) houseBtn.onclick = () => { if (state.money >= nextHouse.cost) { state.money -= nextHouse.cost; state.houseTier += 1; closeModal(); buildRoom(); saveState(); if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 90 }); } };
+        const prestigeBtn = document.getElementById('do-prestige');
+        if (prestigeBtn) prestigeBtn.onclick = () => { state = sanitizeState({ ...DEFAULT_STATE, prestige: state.prestige + 1, unlockedThemes: state.unlockedThemes, milestones: state.milestones }); closeModal(); buildRoom(); renderToolDock(); saveState(); };
+        modalContent.querySelectorAll('.buy-decor').forEach(btn => {
+          btn.onclick = () => { const id = btn.dataset.decor, cost = Number(btn.dataset.cost); if (!state.decors.includes(id) && state.money >= cost) { state.money -= cost; state.decors.push(id); buildRoom(); saveState(); openShopModal(); } };
+        });
+      }
+
+      function openDexModal() {
+        openModal(`
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-black text-purple-300">🏆 업적 & 기록 도감</h2>
+            <button id="close-m" class="touch-btn text-slate-400 hover:text-white text-xl font-bold">✕</button>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mb-4 text-xs">
+            <div class="glass rounded-2xl p-3"><div class="text-slate-400">누적 수익</div><div class="text-base font-black text-emerald-300">₩${state.totalEarned.toLocaleString()}</div></div>
+            <div class="glass rounded-2xl p-3"><div class="text-slate-400">최고 로또 당첨</div><div class="text-base font-black text-amber-300">₩${state.bestJackpot.toLocaleString()}</div></div>
+            <div class="glass rounded-2xl p-3"><div class="text-slate-400">완청한 방</div><div class="text-base font-black text-sky-300">${state.roomsCleaned}회</div></div>
+            <div class="glass rounded-2xl p-3"><div class="text-slate-400">로또 당첨 횟수</div><div class="text-base font-black text-pink-300">${state.lottoWins}회</div></div>
+          </div>
+          <div class="space-y-2">
+            ${MILESTONES.map(m => {
+              const done = state.milestones.includes(m.id);
+              return `<div class="glass rounded-2xl p-3 flex items-center justify-between ${done ? 'border-amber-400/60' : 'opacity-60'}"><div><div class="font-bold text-sm">${done ? '🏅 ' + m.name : '❓ 미해금 업적'}</div><div class="text-[11px] text-slate-300">${done ? m.rewardText : '조건을 달성해 해금하세요'}</div></div><span class="text-xs font-bold ${done ? 'text-amber-300' : 'text-slate-500'}">${done ? '완료' : '잠김'}</span></div>`;
+            }).join('')}
+          </div>
+        `);
+        document.getElementById('close-m').onclick = closeModal;
+      }
+
+      function openThemeModal() {
+        openModal(`
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-black text-emerald-300">🎨 3D 방 테마 선택</h2>
+            <button id="close-m" class="touch-btn text-slate-400 hover:text-white text-xl font-bold">✕</button>
+          </div>
+          <div class="space-y-2.5">
+            ${THEMES.map(t => {
+              const unlocked = state.unlockedThemes.includes(t.id), active = state.theme === t.id;
+              return `<div class="glass rounded-2xl p-3 flex items-center justify-between"><div><div class="font-bold text-sm">${t.icon} ${t.name}</div><div class="text-[11px] text-slate-300">${unlocked ? '해금 완료' : '해금 비용 ₩' + t.unlockCost.toLocaleString()}</div></div><button data-theme="${t.id}" class="pick-theme touch-btn px-3 py-1.5 rounded-xl text-xs font-bold ${active ? 'bg-emerald-500 text-slate-950' : 'bg-white/10 hover:bg-white/20'}">${active ? '적용중' : unlocked ? '적용' : '해금'}</button></div>`;
+            }).join('')}
+          </div>
+        `);
+        document.getElementById('close-m').onclick = closeModal;
+        modalContent.querySelectorAll('.pick-theme').forEach(btn => {
+          btn.onclick = () => {
+            const t = THEMES.find(x => x.id === btn.dataset.theme);
+            if (!t) return;
+            if (!state.unlockedThemes.includes(t.id)) {
+              if (state.money < t.unlockCost) return;
+              state.money -= t.unlockCost;
+              state.unlockedThemes.push(t.id);
+            }
+            state.theme = t.id;
+            closeModal();
+            buildRoom();
+            saveState();
+          };
+        });
+      }
+
+      document.getElementById('btn-lotto').onclick = openLottoModal;
+      document.getElementById('btn-shop').onclick = openShopModal;
+      document.getElementById('btn-dex').onclick = openDexModal;
+      document.getElementById('btn-theme').onclick = openThemeModal;
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      const clock = new THREE.Clock();
+      function animate() {
+        requestAnimationFrame(animate);
+        const dt = Math.min(clock.getDelta(), 0.05);
+        const t = clock.getElapsedTime();
+        if (droneActive && droneMesh) {
+          droneMesh.position.set(Math.sin(t * 1.8) * 2.4, 2.3 + Math.sin(t * 3.5) * 0.25, Math.cos(t * 1.4) * 2.2);
+          droneMesh.rotation.y += dt * 2.5;
+        }
+        for (let i = 0; i < particlePool.length; i++) {
+          const p = particlePool[i];
+          if (p.visible) {
+            p.userData.life += dt;
+            if (p.userData.life >= p.userData.maxLife) p.visible = false;
+            else {
+              p.position.addScaledVector(p.userData.vel, dt);
+              p.userData.vel.y -= 6.5 * dt;
+              p.material.opacity = 1 - p.userData.life / p.userData.maxLife;
+            }
+          }
+        }
+        renderer.render(scene, camera);
+      }
+
+      buildRoom();
+      renderToolDock();
+      updateHUD();
+      animate();
+    })();
+  </script>
+</body>
+</html>
