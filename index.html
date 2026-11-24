@@ -657,22 +657,112 @@
         { min: 1000000000, title: '전설의 대부호', cls: 'bg-gradient-to-r from-amber-400 to-yellow-300 text-stone-950 font-black shadow-[0_0_14px_rgba(251,191,36,0.75)]' }
       ];
 
+      // 청소 대상 카탈로그 — 방마다 테마 가중치에 따라 무작위로 섞여 나온다
       const TRASH_TYPES = [
-        { kind: 'paper', label: '구겨진 종이', cash: 750 },
-        { kind: 'can', label: '빈 음료 캔', cash: 900 },
-        { kind: 'box', label: '택배 상자', cash: 1150 },
-        { kind: 'pizza', label: '피자 박스', cash: 1050 }
+        { kind: 'paper',  label: '구겨진 종이', cash: 750,  bin: 'trashbin' },
+        { kind: 'tissue', label: '휴지 뭉치',   cash: 700,  bin: 'trashbin' },
+        { kind: 'banana', label: '바나나 껍질', cash: 800,  bin: 'trashbin' },
+        { kind: 'pizza',  label: '피자 박스',   cash: 1050, bin: 'trashbin' },
+        { kind: 'ramen',  label: '컵라면 용기', cash: 850,  bin: 'trashbin' },
+        { kind: 'can',    label: '빈 음료 캔',  cash: 900,  bin: 'recycle' },
+        { kind: 'bottle', label: '빈 페트병',   cash: 900,  bin: 'recycle' },
+        { kind: 'box',    label: '택배 상자',   cash: 1250, bin: 'recycle', needsFold: true, foldedLabel: '접은 택배 상자', foldMsg: '📦 상자 납작하게 접기 완료!', foldTip: '📦 클릭해서 상자 먼저 납작하게 접기' }
       ];
 
       const TIDY_TYPES = [
-        { kind: 'books', label: '흩어진 책', target: 'bookshelf', targetLabel: '📚 책장에 꽂기', cash: 2200, needsFold: false },
-        { kind: 'clothes', label: '펼쳐진 옷', target: 'wardrobe', targetLabel: '🚪 옷장에 넣기', cash: 2700, needsFold: true },
-        { kind: 'cushion', label: '떨어진 쿠션', target: 'bed', targetLabel: '🛏️ 침대에 올리기', cash: 2100, needsFold: false },
-        { kind: 'laptop', label: '노트북/서류', target: 'desk', targetLabel: '🖥️ 책상에 정리', cash: 2400, needsFold: false }
+        { kind: 'books',   label: '흩어진 책',      target: 'bookshelf', cash: 2200 },
+        { kind: 'scroll',  label: '펼쳐진 고서',    target: 'bookshelf', cash: 2400 },
+        { kind: 'clothes', label: '펼쳐진 옷',      target: 'wardrobe',  cash: 2700, needsFold: true, foldedLabel: '갠 옷', foldMsg: '👕 옷 개기 완료!', foldTip: '👕 클릭해서 옷 먼저 개기' },
+        { kind: 'cushion', label: '떨어진 쿠션',    target: 'bed',       cash: 2100 },
+        { kind: 'laptop',  label: '노트북/서류',    target: 'desk',      cash: 2400 },
+        { kind: 'socks',   label: '벗어둔 양말',    target: 'laundry',   cash: 1900 },
+        { kind: 'towel',   label: '젖은 수건',      target: 'laundry',   cash: 2000 },
+        { kind: 'mug',     label: '다 마신 머그컵', target: 'kitchen',   cash: 2100 },
+        { kind: 'dishes',  label: '먹고 남은 그릇', target: 'kitchen',   cash: 2300 },
+        { kind: 'toys',    label: '흩어진 장난감',  target: 'toybox',    cash: 2200 },
+        { kind: 'coins',   label: '흩어진 금화',    target: 'chest',     cash: 2600 }
       ];
 
+      const DUST_TYPES = [
+        { kind: 'dust',    label: '바닥 먼지 뭉치', color: 0x9ca3af, cash: 550 },
+        { kind: 'crumbs',  label: '과자 부스러기',  color: 0xd6a35c, cash: 600 },
+        { kind: 'hair',    label: '머리카락 뭉치',  color: 0x3f3a36, cash: 600 },
+        { kind: 'glitter', label: '반짝이 가루',    color: 0xf472b6, cash: 650 },
+        { kind: 'sand',    label: '흙먼지',         color: 0xa8875f, cash: 600 }
+      ];
+
+      const SPILL_TYPES = [
+        { kind: 'coffee', label: '커피 얼룩',        color: 0x78350f, hp: 100, cash: 1350 },
+        { kind: 'juice',  label: '오렌지 주스 자국', color: 0xf97316, hp: 130, cash: 1500 },
+        { kind: 'cola',   label: '끈적한 콜라 자국', color: 0x4c1d1d, hp: 170, cash: 1750 },
+        { kind: 'mud',    label: '진흙 발자국',      color: 0x6b4f2a, hp: 45,  cash: 650, trail: true },
+        { kind: 'wax',    label: '굳은 촛농',        color: 0xf5f0e1, hp: 190, cash: 1850 },
+        { kind: 'wine',   label: '와인 자국',        color: 0x7f1d3a, hp: 140, cash: 1600 },
+        { kind: 'ink',    label: '잉크 자국',        color: 0x1e3a8a, hp: 150, cash: 1650 },
+        { kind: 'crayon', label: '바닥 크레용 낙서', color: 0x8b5cf6, hp: 120, cash: 1450 }
+      ];
+
+      const KNOCKED_TYPES = [
+        { kind: 'lamp',  label: '쓰러진 스탠드', cash: 1600 },
+        { kind: 'stool', label: '넘어진 의자',   cash: 1500 },
+        { kind: 'fan',   label: '쓰러진 선풍기', cash: 1700 }
+      ];
+
+      const PICKUP_TYPES = [
+        { kind: 'coin', label: '떨어진 동전',     cash: 1200 },
+        { kind: 'bill', label: '굴러다니는 지폐', cash: 2600 }
+      ];
+
+      // 테마별 출현 가중치와 추가 가구 확률
+      const THEME_MESS = {
+        studio: {
+          trash: { paper: 3, tissue: 2, banana: 1, pizza: 2, ramen: 2, can: 2, bottle: 2, box: 2 },
+          tidy: { books: 2, clothes: 3, cushion: 2, laptop: 2, socks: 2, towel: 1, mug: 2, dishes: 2 },
+          dust: { dust: 3, crumbs: 2, hair: 2 }, spill: { coffee: 3, juice: 2, cola: 1, mud: 1 },
+          extras: { recycle: 0.7, laundry: 0.7, kitchen: 0.6, mirror: 0.5 }, cobwebs: 1
+        },
+        kids: {
+          trash: { paper: 2, tissue: 2, banana: 2, can: 1, bottle: 2, box: 1 },
+          tidy: { toys: 5, books: 2, clothes: 2, cushion: 2, socks: 2, mug: 1 },
+          dust: { crumbs: 3, glitter: 3, dust: 1 }, spill: { juice: 3, crayon: 3, mud: 2 },
+          extras: { recycle: 0.5, laundry: 0.6, kitchen: 0.3, mirror: 0.4, toybox: 1 }, cobwebs: 0
+        },
+        castle: {
+          trash: { paper: 2, box: 1, bottle: 1, banana: 1 },
+          tidy: { coins: 5, scroll: 2, books: 1, clothes: 2, cushion: 1 },
+          dust: { sand: 3, dust: 2 }, spill: { wax: 3, wine: 2, mud: 2 },
+          extras: { recycle: 0.3, laundry: 0.3, kitchen: 0.2, mirror: 0.6, chest: 1 }, cobwebs: 4
+        },
+        hoarder: {
+          trash: { paper: 3, tissue: 3, banana: 2, pizza: 3, ramen: 3, can: 3, bottle: 3, box: 3 },
+          tidy: { clothes: 3, socks: 3, towel: 2, dishes: 3, mug: 2, books: 1, laptop: 1 },
+          dust: { dust: 3, hair: 3, crumbs: 2 }, spill: { cola: 3, coffee: 2, mud: 2, juice: 1 },
+          extras: { recycle: 1, laundry: 0.8, kitchen: 0.7, mirror: 0.3 }, cobwebs: 3
+        },
+        library: {
+          trash: { paper: 4, ramen: 1, can: 1, box: 1 },
+          tidy: { books: 5, scroll: 3, mug: 2, laptop: 2, cushion: 1, clothes: 1 },
+          dust: { dust: 4, hair: 1 }, spill: { coffee: 3, ink: 3 },
+          extras: { recycle: 0.5, laundry: 0.3, kitchen: 0.3, mirror: 0.3, libShelf: 1 }, cobwebs: 3
+        }
+      };
+
+      function weightedPick(weights, allowFn) {
+        const entries = Object.entries(weights).filter(([k, w]) => w > 0 && (!allowFn || allowFn(k)));
+        if (!entries.length) return null;
+        const total = entries.reduce((s, [, w]) => s + w, 0);
+        let r = Math.random() * total;
+        for (const [k, w] of entries) { r -= w; if (r <= 0) return k; }
+        return entries[entries.length - 1][0];
+      }
+      function randInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+      function shuffleArr(arr) {
+        for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+        return arr;
+      }
+
       const DAILY_MISSIONS = [
-        { id: 'care', desc: '🪴 화분 물주기 + 🪟 창문 유리 닦기 완료하기', rewardMult: 1.0 },
+        { id: 'care', desc: '🧹 오늘의 집안일(이불·화분·창문 등) 모두 끝내기', rewardMult: 1.0 },
         { id: 'fever', desc: '🔥 청소 피버 타임 1회 발동하기', rewardMult: 1.1 },
         { id: 'fast', desc: '⏱️ 90초 안에 방 청결도 100% 달성하기', rewardMult: 1.4 }
       ];
@@ -1128,8 +1218,11 @@
       let chandelierGroup = null;
       let bookshelfSlotIdx = 0;
 
-      let bedMade = false, drawerChecked = false, plantWatered = false, windowCleaned = false;
-      let windowHp = 100;
+      // 집안일은 방마다 무작위로 일부만 켜진다
+      let chores = [];
+      let binState = {};   // 쓰레기통·분리수거함 용량
+      let tweens = [];     // 쓰러진 물건 세우기 애니메이션
+      let mirrorSmudgeMesh = null, scribbleMesh = null;
       let xrayManual = false;
       let dayElapsedSec = 0;
       let currentMission = DAILY_MISSIONS[0];
@@ -1159,44 +1252,31 @@
       let binBounceTimer = 0, wardrobeOpenTimer = 0;
       let targetLidAngle = 0, targetWardAngle = 0;
       let animFrameId = null;
+      let webglLost = false;
+
+      // 브라우저가 3D 그래픽(WebGL)을 끊으면 캔버스가 까맣게 변한다.
+      // 복구 신호가 오면 저장된 진행 상황으로 페이지를 다시 연다.
+      canvas.addEventListener('webglcontextlost', (e) => {
+        e.preventDefault();
+        webglLost = true;
+        try { if (typeof saveState === 'function') saveState(); } catch (err) {}
+      }, false);
+      canvas.addEventListener('webglcontextrestored', () => {
+        location.reload();
+      }, false);
 
       // 2-Finger Touch State
       let touchPinchDist = 0, touchMidX = 0;
 
-      const DROP_TARGETS = {
-        trashbin:  { x: 4.15, y: 0.75, z: -1.75, radius: 1.45, label: '🗑️ 쓰레기통에 버리기' },
-        bookshelf: { x: 0.1,  y: 1.5,  z: -4.1,  radius: 1.85, label: '📚 책장에 꽂기' },
-        wardrobe:  { x: -3.9, y: 1.5,  z: 2.85,  radius: 1.95, label: '🚪 옷장에 넣기' },
-        bed:       { x: -3.1, y: 0.9,  z: -3.0,  radius: 2.0,  label: '🛏️ 침대에 올리기' },
-        desk:      { x: 3.05, y: 1.25, z: -3.55, radius: 1.85, label: '🖥️ 책상에 정리' }
-      };
-
-      const SURFACE_DUST_SPOTS = [
-        { x: 2.45,  y: 1.15, z: -3.35, label: '책상 위 먼지' },
-        { x: 3.65,  y: 1.15, z: -3.75, label: '책상 구석 먼지' },
-        { x: -0.35, y: 2.52, z: -4.25, label: '책장 위 먼지' },
-        { x: -4.15, y: 2.98, z: 2.4,   label: '옷장 위 먼지' },
-        { x: -4.15, y: 2.98, z: 3.35,  label: '옷장 구석 먼지' },
-        { x: -3.2,  y: 1.38, z: -4.55, label: '침대 헤드 먼지' }
-      ];
-
-      const FURNITURE_ZONES = [
-        { minX: -4.6, maxX: -1.2, minZ: -4.6, maxZ: -1.3 },
-        { minX: -1.2, maxX: 1.4,  minZ: -4.6, maxZ: -3.2 },
-        { minX: 1.7,  maxX: 4.6,  minZ: -4.6, maxZ: -1.2 },
-        { minX: -4.6, maxX: -2.9, minZ: 1.4,  maxZ: 4.5 },
-        { minX: 3.2,  maxX: 4.6,  minZ: 2.8,  maxZ: 4.5 },
-        { minX: -4.6, maxX: -2.6, minZ: -1.1, maxZ: 1.1 }
-      ];
+      // 방을 만들 때마다 새로 계산되는 가구 배치 정보
+      let DROP_TARGETS = {};
+      let layout = { furn: {}, zones: [], dustSpots: [], cobwebSpots: [], decorSlots: {}, wallFeatures: {}, stack: {} };
 
       function isInsideFurniture(x, z) {
-        if (state.decors && state.decors.sofa) {
-          if (x >= 2.0 && x <= 3.6 && z >= -0.05 && z <= 2.65) return true;
-        }
-        return FURNITURE_ZONES.some(zBox =>
-          x >= zBox.minX - 0.3 && x <= zBox.maxX + 0.3 &&
-          z >= zBox.minZ - 0.3 && z <= zBox.maxZ + 0.3
-        );
+        return layout.zones.some(zb => {
+          if (zb.decorId && !(state.decors && state.decors[zb.decorId])) return false;
+          return x >= zb.minX - 0.3 && x <= zb.maxX + 0.3 && z >= zb.minZ - 0.3 && z <= zb.maxZ + 0.3;
+        });
       }
 
       function makeBox(w, h, d, color, opts = {}) {
@@ -1255,7 +1335,7 @@
         roboGroup = new THREE.Group();
         scene.add(roomGroup, decorGroup, organizedGroup, itemsGroup, ticketsGroup, particlesGroup, roboGroup);
 
-        floorPlane = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), new THREE.MeshBasicMaterial({ visible: false }));
+        floorPlane = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshBasicMaterial({ visible: false }));
         floorPlane.rotation.x = -Math.PI / 2; scene.add(floorPlane);
 
         dragPlane = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), new THREE.MeshBasicMaterial({ visible: false }));
@@ -1340,21 +1420,426 @@
         });
       }
 
+      // ------------------------------------------------------------
+      // 랜덤 방 레이아웃
+      // 가구는 모두 "앞면 +z, 등판 -z" 로컬 좌표로 만든 뒤, 고른 벽 방향으로 돌려서 붙인다.
+      // ------------------------------------------------------------
+      const ROOM_HALF = 5;
+      const ALL_WALLS = ['back', 'left', 'right', 'front'];
+      const CENTER_RESERVE = [-1.0, 1.5, -0.6, 1.5]; // 가운데 청소 공간은 비워 둔다
+      const DROP_INFO = {
+        trashbin:  { label: '🗑️ 일반 쓰레기통에 버리기', radius: 1.45 },
+        recycle:   { label: '♻️ 분리수거함에 넣기', radius: 1.45 },
+        bookshelf: { label: '📚 책장에 꽂기', radius: 1.85 },
+        wardrobe:  { label: '🚪 옷장에 넣기', radius: 1.95 },
+        bed:       { label: '🛏️ 침대에 올리기', radius: 2.0 },
+        desk:      { label: '🖥️ 책상에 정리', radius: 1.85 },
+        laundry:   { label: '🧺 빨래 바구니에 넣기', radius: 1.5 },
+        kitchen:   { label: '🚰 싱크대에 넣기', radius: 1.7 },
+        toybox:    { label: '🧸 장난감 상자에 넣기', radius: 1.6 },
+        chest:     { label: '💰 보물 상자에 넣기', radius: 1.6 }
+      };
+      // 상점에서 사는 인테리어 소품은 방을 만들 때 미리 자리를 잡아 둔다
+      const DECOR_SPECS = {
+        aquarium: { bounds: [-0.93, 0.93, -0.48, 0.48], h: 1.9, walls: ['back', 'left'] },
+        sofa:     { bounds: [-1.17, 1.17, -0.48, 0.48], h: 1.05, walls: ['right', 'front', 'left'] },
+        trophy:   { bounds: [-0.32, 0.32, -0.32, 0.32], h: 1.45, walls: ALL_WALLS }
+      };
+
+      function disposeObject(obj) {
+        obj.traverse(o => {
+          if (o.geometry && typeof o.geometry.dispose === 'function') o.geometry.dispose();
+          if (o.material) {
+            (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => {
+              if (m.map && typeof m.map.dispose === 'function') m.map.dispose();
+              if (typeof m.dispose === 'function') m.dispose();
+            });
+          }
+        });
+      }
+
+      // 벽 하나에 붙였을 때의 중심 위치·회전·바닥 영역
+      function wallPose(wall, along, w, d) {
+        const gap = 0.04, edge = 0.15;
+        if (wall === 'back')  return { x: along, z: -ROOM_HALF + gap + d / 2, rot: 0, box: [along - w / 2, along + w / 2, -ROOM_HALF + gap, -ROOM_HALF + gap + d] };
+        if (wall === 'left')  return { x: -ROOM_HALF + gap + d / 2, z: along, rot: Math.PI / 2, box: [-ROOM_HALF + gap, -ROOM_HALF + gap + d, along - w / 2, along + w / 2] };
+        if (wall === 'right') return { x: ROOM_HALF - edge - d / 2, z: along, rot: -Math.PI / 2, box: [ROOM_HALF - edge - d, ROOM_HALF - edge, along - w / 2, along + w / 2] };
+        return { x: along, z: ROOM_HALF - edge - d / 2, rot: Math.PI, box: [along - w / 2, along + w / 2, ROOM_HALF - edge - d, ROOM_HALF - edge] };
+      }
+
+      function boxesOverlap(a, b, m) {
+        return a[0] < b[1] + m && a[1] > b[0] - m && a[2] < b[3] + m && a[3] > b[2] - m;
+      }
+
+      function tryPlaceFurniture(spec, placed, useReserve) {
+        const w = spec.bounds[1] - spec.bounds[0], d = spec.bounds[3] - spec.bounds[2];
+        for (let tries = 0; tries < 70; tries++) {
+          const wall = spec.walls[Math.floor(Math.random() * spec.walls.length)];
+          const lo = -ROOM_HALF + w / 2 + 0.05, hi = ROOM_HALF - w / 2 - 0.05;
+          if (hi < lo) continue;
+          const along = lo + Math.random() * (hi - lo);
+          const pose = wallPose(wall, along, w, d);
+          if (placed.some(p => boxesOverlap(pose.box, p.box, 0.22))) continue;
+          if (useReserve && boxesOverlap(pose.box, CENTER_RESERVE, 0)) continue;
+          return Object.assign({ wall, along, w, d }, pose);
+        }
+        return null;
+      }
+
+      // 창문·액자·횃불·낙서처럼 벽에 거는 것
+      function mountOnWall(group, spot, y) {
+        if (spot.wall === 'back') { group.position.set(spot.along, y, -ROOM_HALF + 0.03); group.rotation.y = 0; }
+        else { group.position.set(-ROOM_HALF + 0.03, y, spot.along); group.rotation.y = Math.PI / 2; }
+      }
+
+      function furnWorld(id, p) {
+        const f = layout.furn[id];
+        return f.inner.localToWorld(new THREE.Vector3(p[0], p[1], p[2]));
+      }
+
+      function addFloorRing(group, r, color) {
+        const ring = new THREE.Mesh(new THREE.RingGeometry(r, r + 0.1, 28), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }));
+        ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03; group.add(ring);
+        return ring;
+      }
+
+      // 쓰레기통이 꽉 찼을 때 보이는 봉투 더미 + 빨간 링
+      function makeBinFullMarkers(group, y, spread) {
+        const mound = new THREE.Group();
+        const bagMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.6 });
+        [[0, 0, 0, 0.26], [0.16, -0.04, 0.08, 0.19], [-0.15, -0.03, -0.06, 0.2]].forEach(([x, yy, z, r]) => {
+          const b = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 0), bagMat);
+          b.position.set(x * spread, yy, z); b.castShadow = true; mound.add(b);
+        });
+        mound.position.y = y; mound.visible = false; group.add(mound);
+        const ring = addFloorRing(group, 0.6 * Math.max(1, spread * 0.8), 0xef4444); ring.visible = false;
+        return { mound, ring };
+      }
+
+      const FURN_BUILDERS = {
+        bed(room) {
+          const bed = new THREE.Group();
+          const bedBase = makeBox(2.35, 0.3, 3.05, room.woodColor); bedBase.position.y = 0.3; bed.add(bedBase);
+          [[-1.08, -1.42], [1.08, -1.42], [-1.08, 1.42], [1.08, 1.42]].forEach(([lx, lz]) => {
+            const leg = makeBox(0.14, 0.2, 0.14, room.woodColor); leg.position.set(lx, 0.1, lz); bed.add(leg);
+          });
+          const head = makeBox(2.4, 1.25, 0.16, state.roomId === 3 ? 0xd4af37 : room.woodColor, { metalness: state.roomId === 3 ? 0.55 : 0.06 });
+          head.position.set(0, 0.72, -1.5); bed.add(head);
+          const headPad = makeBox(2.15, 0.75, 0.08, 0xf3eee6, { roughness: 0.9 }); headPad.position.set(0, 0.85, -1.4); bed.add(headPad);
+          const mattress = makeBox(2.18, 0.34, 2.86, 0xfdfbf7, { roughness: 0.88 }); mattress.position.y = 0.6; bed.add(mattress);
+          const blanketGroup = new THREE.Group();
+          const blanket = makeBox(2.24, 0.36, 2.02, room.bedBlanket, { roughness: 0.85 });
+          const fold = makeBox(2.26, 0.12, 0.32, 0xffffff, { roughness: 0.9 }); fold.position.set(0, 0.16, -0.96);
+          blanketGroup.add(blanket, fold);
+          blanketGroup.position.set(0.14, 0.65, 0.44); blanketGroup.rotation.set(0.06, 0.18, -0.05);
+          bed.add(blanketGroup);
+          const messyRing = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.68, 24), new THREE.MeshBasicMaterial({ color: 0xf59e0b, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }));
+          messyRing.rotation.x = -Math.PI / 2; messyRing.position.set(0, 0.96, 0.35);
+          bed.add(messyRing);
+          [-0.55, 0.55].forEach(px => {
+            const pillow = makeBox(0.85, 0.22, 0.52, 0xffffff, { roughness: 0.9 });
+            pillow.position.set(px, 0.84, -1.06); pillow.rotation.x = 0.15; bed.add(pillow);
+          });
+          const stand = makeBox(0.75, 0.68, 0.72, room.woodColor); stand.position.set(1.62, 0.34, -1.12); bed.add(stand);
+          const standDrawer = makeBox(0.62, 0.22, 0.04, 0xffffff, { roughness: 0.6 }); standDrawer.position.set(1.62, 0.45, -0.75); bed.add(standDrawer);
+          const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.16, 0.24, 16), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.65, roughness: 0.3 }));
+          lampBase.position.set(1.62, 0.8, -1.12); lampBase.castShadow = true; bed.add(lampBase);
+          const lampShade = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.26, 0.32, 20), new THREE.MeshStandardMaterial({ color: 0xfff3d6, emissive: 0xffc864, emissiveIntensity: 0.7, roughness: 0.8 }));
+          lampShade.position.set(1.62, 1.06, -1.12); bed.add(lampShade);
+          const lampLight = new THREE.PointLight(0xffcf77, 0.75, 6); lampLight.position.set(1.62, 1.15, -1.12); bed.add(lampLight);
+          return {
+            inner: bed, bounds: [-1.22, 2.02, -1.6, 1.56], h: 1.4, walls: ['back', 'left', 'right'], drop: [0, 0.9, 0.3],
+            dust: [{ p: [-0.6, 1.42, -1.5], label: '침대 헤드 먼지' }, { p: [1.62, 0.74, -0.82], label: '협탁 위 먼지' }],
+            onMount() { bedBlanketMesh = blanketGroup; bedMessyRing = messyRing; }
+          };
+        },
+
+        bookshelf(room) {
+          const shelf = new THREE.Group();
+          const shW = 2.1, shH = 2.45, shD = 0.62;
+          const shBack = makeBox(shW, shH, 0.06, room.woodColor); shBack.position.set(0, shH / 2, -shD / 2 + 0.03);
+          const shL = makeBox(0.09, shH, shD, room.woodColor); shL.position.set(-shW / 2 + 0.045, shH / 2, 0);
+          const shR = makeBox(0.09, shH, shD, room.woodColor); shR.position.set(shW / 2 - 0.045, shH / 2, 0);
+          shelf.add(shBack, shL, shR);
+          const bookCols = [0xef4444, 0x3b82f6, 0x10b981, 0xf59e0b, 0x8b5cf6, 0xec4899, 0x14b8a6, 0xf97316];
+          [0.12, 0.72, 1.32, 1.92, 2.42].forEach((sy, idx) => {
+            const plank = makeBox(shW, 0.08, shD, room.woodColor); plank.position.y = sy; shelf.add(plank);
+            if (idx < 4) {
+              let bx = -shW / 2 + 0.18;
+              const maxBooks = (idx === 1 || idx === 2) ? 4 : 8;
+              for (let b = 0; b < maxBooks; b++) {
+                const bw = 0.1 + ((b + idx) % 3) * 0.025;
+                const bh = 0.34 + ((b * 2 + idx) % 3) * 0.07;
+                if (bx + bw > shW / 2 - 0.14) break;
+                const book = makeBox(bw, bh, 0.38, bookCols[(b + idx * 3) % bookCols.length], { roughness: 0.75 });
+                book.position.set(bx + bw / 2, sy + 0.04 + bh / 2, 0.04);
+                shelf.add(book); bx += bw + 0.025;
+              }
+            }
+          });
+          const miniPot = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.1, 0.2, 14), new THREE.MeshStandardMaterial({ color: 0xd97757, roughness: 0.8 })); miniPot.position.set(0.65, shH + 0.1, 0);
+          const miniLeaf = new THREE.Mesh(new THREE.DodecahedronGeometry(0.18, 0), new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.7 })); miniLeaf.position.set(0.65, shH + 0.28, 0);
+          shelf.add(miniPot, miniLeaf);
+          return {
+            inner: shelf, bounds: [-1.06, 1.06, -0.32, 0.32], h: 2.6, walls: ['back', 'left'], xray: true, drop: [0, 1.5, 0.25],
+            dust: [{ p: [-0.45, 2.52, 0.05], label: '책장 위 먼지' }, { p: [0.6, 0.82, 0.05], label: '책장 칸 먼지' }]
+          };
+        },
+
+        desk(room) {
+          const desk = new THREE.Group();
+          const topMesh = makeBox(2.45, 0.11, 1.25, room.woodColor); topMesh.position.y = 1.05; desk.add(topMesh);
+          [[-1.12, -0.52], [-1.12, 0.52]].forEach(([lx, lz]) => {
+            const leg = makeBox(0.1, 1.02, 0.1, 0x334155, { metalness: 0.35, roughness: 0.4 }); leg.position.set(lx, 0.51, lz); desk.add(leg);
+          });
+          const ped = makeBox(0.72, 1.0, 1.12, room.woodColor); ped.position.set(0.82, 0.5, 0); desk.add(ped);
+          const drawer = new THREE.Group(); drawer.position.set(0.82, 0.84, 0.56);
+          const drFront = makeBox(0.66, 0.22, 0.06, room.woodColor);
+          const drHandle = makeBox(0.24, 0.04, 0.06, 0xfbbf24, { metalness: 0.75, roughness: 0.2 }); drHandle.position.z = 0.04;
+          drawer.add(drFront, drHandle); desk.add(drawer);
+          const drawerRing = new THREE.Mesh(new THREE.RingGeometry(0.18, 0.25, 18), new THREE.MeshBasicMaterial({ color: 0xfbbf24, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }));
+          drawerRing.position.set(0.82, 0.84, 0.65); desk.add(drawerRing);
+          [0.24, 0.54].forEach(dy => {
+            const handle = makeBox(0.24, 0.04, 0.05, 0xe2e8f0, { metalness: 0.7, roughness: 0.25 }); handle.position.set(0.82, dy, 0.58); desk.add(handle);
+          });
+          const standFoot = makeBox(0.45, 0.04, 0.3, 0x1e293b, { metalness: 0.5 }); standFoot.position.set(-0.2, 1.12, -0.25);
+          const standNeck = makeBox(0.08, 0.35, 0.08, 0x1e293b, { metalness: 0.5 }); standNeck.position.set(-0.2, 1.3, -0.28);
+          const bezel = makeBox(1.18, 0.68, 0.06, 0x0f172a, { roughness: 0.35 }); bezel.position.set(-0.2, 1.62, -0.22);
+          const screen = makeBox(1.1, 0.6, 0.02, 0x38bdf8, { emissive: 0x0ea5e9, emissiveIntensity: 0.55, roughness: 0.2, castShadow: false }); screen.position.set(-0.2, 1.62, -0.185);
+          const kb = makeBox(0.62, 0.03, 0.22, 0x334155); kb.position.set(-0.22, 1.12, 0.2);
+          const mouseObj = makeBox(0.11, 0.03, 0.16, 0x475569); mouseObj.position.set(0.24, 1.12, 0.22);
+          desk.add(standFoot, standNeck, bezel, screen, kb, mouseObj);
+          const chair = new THREE.Group(); chair.position.set(-0.25, 0, 0.92);
+          const seat = makeBox(0.76, 0.12, 0.72, 0x334155, { roughness: 0.8 }); seat.position.y = 0.65;
+          const backRest = makeBox(0.74, 0.85, 0.12, 0x1e293b, { roughness: 0.8 }); backRest.position.set(0, 1.08, 0.32);
+          const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.55, 12), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7, roughness: 0.3 })); stem.position.y = 0.34;
+          const wheelBase = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.38, 0.08, 5), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 })); wheelBase.position.y = 0.06;
+          chair.add(seat, backRest, stem, wheelBase); desk.add(chair);
+          return {
+            inner: desk, bounds: [-1.24, 1.24, -0.64, 1.31], h: 1.95, walls: ['back', 'left', 'right'], drop: [0, 1.25, 0],
+            dust: [{ p: [-0.6, 1.15, 0.2], label: '책상 위 먼지' }, { p: [0.6, 1.15, -0.2], label: '책상 구석 먼지' }],
+            onMount() { deskDrawerMesh = drawer; deskDrawerRing = drawerRing; }
+          };
+        },
+
+        trashbin() {
+          const bin = new THREE.Group();
+          const binBody = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.33, 0.88, 18), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.35, roughness: 0.45 }));
+          binBody.position.y = 0.44; binBody.castShadow = true; binBody.receiveShadow = true;
+          const binRim = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.04, 10, 24), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.4, roughness: 0.35 }));
+          binRim.rotation.x = Math.PI / 2; binRim.position.y = 0.88;
+          const lidPivot = new THREE.Group(); lidPivot.position.set(0, 0.92, -0.4);
+          const lidDisk = new THREE.Mesh(new THREE.CylinderGeometry(0.43, 0.43, 0.07, 18), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.4, roughness: 0.4 }));
+          lidDisk.position.set(0, 0, 0.4); lidDisk.castShadow = true;
+          lidPivot.add(lidDisk);
+          bin.add(binBody, binRim, lidPivot);
+          const marks = makeBinFullMarkers(bin, 1.02, 1);
+          return {
+            inner: bin, bounds: [-0.46, 0.46, -0.46, 0.46], h: 1.0, walls: ALL_WALLS, drop: [0, 0.75, 0], binPt: [0, 0.6, 0], refs: marks,
+            onMount() { trashBinLidMesh = lidPivot; }
+          };
+        },
+
+        recycle() {
+          const g = new THREE.Group();
+          [0x2563eb, 0x16a34a, 0xeab308].forEach((c, i) => {
+            const x = -0.45 + i * 0.45;
+            const body = makeBox(0.42, 0.72, 0.56, c, { roughness: 0.5 }); body.position.set(x, 0.36, 0);
+            const lid = makeBox(0.44, 0.05, 0.58, 0xf8fafc, { roughness: 0.4 }); lid.position.set(x, 0.745, 0);
+            const slot = makeBox(0.24, 0.02, 0.1, 0x111827, { castShadow: false }); slot.position.set(x, 0.775, 0.06);
+            g.add(body, lid, slot);
+          });
+          const sign = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.025, 6, 16), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+          sign.position.set(0, 0.45, 0.29); g.add(sign);
+          const marks = makeBinFullMarkers(g, 0.88, 1.6);
+          return { inner: g, bounds: [-0.7, 0.7, -0.3, 0.33], h: 0.85, walls: ALL_WALLS, drop: [0, 0.7, 0], binPt: [0, 0.6, 0], refs: marks };
+        },
+
+        wardrobe() {
+          const ward = new THREE.Group();
+          const wBody = makeBox(2.35, 2.85, 1.15, 0x475569, { roughness: 0.65 }); wBody.position.y = 1.425;
+          const doorL = makeBox(1.06, 2.58, 0.06, 0x64748b, { roughness: 0.6 }); doorL.position.set(-0.56, 1.42, 0.58);
+          const knobL = makeBox(0.05, 0.32, 0.06, 0xfbbf24, { metalness: 0.75, roughness: 0.25 }); knobL.position.set(-0.12, 1.38, 0.63);
+          const doorPivot = new THREE.Group(); doorPivot.position.set(1.09, 1.42, 0.58);
+          const doorR = makeBox(1.06, 2.58, 0.06, 0x64748b, { roughness: 0.6 }); doorR.position.set(-0.53, 0, 0);
+          const knobR = makeBox(0.05, 0.32, 0.06, 0xfbbf24, { metalness: 0.75, roughness: 0.25 }); knobR.position.set(-0.97, -0.04, 0.05);
+          doorPivot.add(doorR, knobR);
+          const crown = makeBox(2.45, 0.12, 1.24, 0x334155); crown.position.y = 2.88;
+          ward.add(wBody, doorL, knobL, doorPivot, crown);
+          return {
+            inner: ward, bounds: [-1.23, 1.23, -0.62, 0.66], h: 2.95, walls: ['back', 'left'], xray: true, drop: [0, 1.5, 0.7],
+            dust: [{ p: [-0.5, 2.98, 0], label: '옷장 위 먼지' }, { p: [0.65, 2.98, 0.1], label: '옷장 구석 먼지' }],
+            onMount() { wardrobeDoorR = doorPivot; }
+          };
+        },
+
+        plant() {
+          const plant = new THREE.Group();
+          const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.3, 0.62, 18), new THREE.MeshStandardMaterial({ color: 0xc26d4f, roughness: 0.82 }));
+          pot.position.y = 0.31; pot.castShadow = true;
+          const soil = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.05, 16), new THREE.MeshStandardMaterial({ color: 0x3f2e21, roughness: 1 }));
+          soil.position.y = 0.61;
+          const leaves = new THREE.Group();
+          const leafMat = new THREE.MeshStandardMaterial({ color: 0x65a30d, roughness: 0.7 });
+          for (let i = 0; i < 7; i++) {
+            const ang = (i / 7) * Math.PI * 2;
+            const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.95, 6), leafMat);
+            leaf.position.set(Math.cos(ang) * 0.22, 1.05 + (i % 2) * 0.18, Math.sin(ang) * 0.22);
+            leaf.rotation.z = -Math.cos(ang) * 0.55; leaf.rotation.x = Math.sin(ang) * 0.55; leaf.castShadow = true;
+            leaves.add(leaf);
+          }
+          const ring = new THREE.Mesh(new THREE.RingGeometry(0.44, 0.54, 24), new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }));
+          ring.rotation.x = -Math.PI / 2; ring.position.y = 0.05;
+          plant.add(pot, soil, leaves, ring);
+          return {
+            inner: plant, bounds: [-0.46, 0.46, -0.46, 0.46], h: 1.7, walls: ALL_WALLS,
+            onMount() { plantLeavesGroup = leaves; plantThirstyRing = ring; }
+          };
+        },
+
+        laundry() {
+          const g = new THREE.Group();
+          const wicker = new THREE.MeshStandardMaterial({ color: 0xc8a26a, roughness: 0.95, side: THREE.DoubleSide });
+          const basket = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.34, 0.6, 18, 1, true), wicker);
+          basket.position.y = 0.3; basket.castShadow = true;
+          const bottom = new THREE.Mesh(new THREE.CircleGeometry(0.34, 18), new THREE.MeshStandardMaterial({ color: 0xa47d48 }));
+          bottom.rotation.x = -Math.PI / 2; bottom.position.y = 0.02;
+          const bandMat = new THREE.MeshStandardMaterial({ color: 0x92693a, roughness: 0.8 });
+          const rim = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.035, 8, 24), bandMat); rim.rotation.x = Math.PI / 2; rim.position.y = 0.6;
+          [0, 1, 2].forEach(i => {
+            const band = new THREE.Mesh(new THREE.TorusGeometry(0.36 + i * 0.022, 0.012, 4, 24), bandMat);
+            band.rotation.x = Math.PI / 2; band.position.y = 0.15 + i * 0.15; g.add(band);
+          });
+          const peek = makeBox(0.3, 0.1, 0.25, 0xf472b6, { roughness: 1 }); peek.position.set(0.05, 0.52, 0); peek.rotation.z = 0.3;
+          g.add(basket, bottom, rim, peek);
+          return { inner: g, bounds: [-0.46, 0.46, -0.46, 0.46], h: 0.65, walls: ALL_WALLS, drop: [0, 0.6, 0] };
+        },
+
+        kitchen(room) {
+          const g = new THREE.Group();
+          const cab = makeBox(2.2, 0.9, 0.7, 0xf5f5f4, { roughness: 0.6 }); cab.position.y = 0.45;
+          const top = makeBox(2.26, 0.06, 0.76, 0x57534e, { roughness: 0.35, metalness: 0.1 }); top.position.y = 0.93;
+          const sink = makeBox(0.72, 0.03, 0.46, 0x94a3b8, { metalness: 0.7, roughness: 0.2, castShadow: false }); sink.position.set(-0.45, 0.965, 0.03);
+          const tap = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.36, 10), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.8, roughness: 0.2 }));
+          tap.position.set(-0.45, 1.14, -0.26);
+          const spout = makeBox(0.05, 0.05, 0.22, 0xe2e8f0, { metalness: 0.8, roughness: 0.2 }); spout.position.set(-0.45, 1.3, -0.16);
+          const rack = makeBox(0.5, 0.04, 0.36, 0xcbd5e1, { metalness: 0.5 }); rack.position.set(0.55, 0.98, 0);
+          [-0.55, 0, 0.55].forEach(x => {
+            const door = makeBox(0.66, 0.78, 0.02, 0xe7e5e4, { castShadow: false }); door.position.set(x, 0.45, 0.36);
+            const knob = makeBox(0.12, 0.03, 0.03, 0x78716c, { castShadow: false }); knob.position.set(x, 0.75, 0.38);
+            g.add(door, knob);
+          });
+          g.add(cab, top, sink, tap, spout, rack);
+          return {
+            inner: g, bounds: [-1.13, 1.13, -0.38, 0.39], h: 1.35, walls: ['back', 'left'], drop: [-0.2, 1.0, 0.1],
+            dust: [{ p: [0.8, 1.0, 0.15], label: '조리대 먼지' }]
+          };
+        },
+
+        mirror(room) {
+          const g = new THREE.Group();
+          const tilt = new THREE.Group(); tilt.rotation.x = -0.08; g.add(tilt);
+          const frame = makeBox(0.78, 1.82, 0.06, room.woodColor); frame.position.y = 0.98;
+          const glass = new THREE.Mesh(new THREE.PlaneGeometry(0.66, 1.66), new THREE.MeshStandardMaterial({ color: 0xdbeafe, metalness: 0.9, roughness: 0.08, emissive: 0x93c5fd, emissiveIntensity: 0.18 }));
+          glass.position.set(0, 0.98, 0.035);
+          const smudge = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 1.5), new THREE.MeshBasicMaterial({ color: 0xa8a29e, transparent: true, opacity: 0.62 }));
+          smudge.position.set(0, 0.98, 0.045);
+          tilt.add(frame, glass, smudge);
+          const foot = makeBox(0.7, 0.06, 0.5, room.woodColor); foot.position.set(0, 0.03, 0.05);
+          g.add(foot);
+          return {
+            inner: g, bounds: [-0.4, 0.4, -0.28, 0.32], h: 1.95, walls: ['back', 'left'],
+            dust: [{ p: [0, 1.93, -0.12], label: '거울 위 먼지' }],
+            onMount() { mirrorSmudgeMesh = smudge; }
+          };
+        },
+
+        toybox() {
+          const g = new THREE.Group();
+          const body = makeBox(1.0, 0.55, 0.65, 0xf472b6, { roughness: 0.7 }); body.position.y = 0.275;
+          const stripe = makeBox(1.02, 0.1, 0.67, 0xfacc15, { castShadow: false }); stripe.position.y = 0.38;
+          const lidPivot = new THREE.Group(); lidPivot.position.set(0, 0.55, -0.32); lidPivot.rotation.x = -0.9;
+          const lid = makeBox(1.02, 0.06, 0.66, 0x38bdf8); lid.position.set(0, 0, 0.33); lidPivot.add(lid);
+          const ball = new THREE.Mesh(new THREE.SphereGeometry(0.13, 14, 10), new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.5 })); ball.position.set(0.25, 0.6, 0.05);
+          g.add(body, stripe, lidPivot, ball);
+          return { inner: g, bounds: [-0.53, 0.53, -0.36, 0.36], h: 1.0, walls: ALL_WALLS, drop: [0, 0.6, 0] };
+        },
+
+        chest() {
+          const g = new THREE.Group();
+          const cBody = makeBox(1.15, 0.52, 0.85, 0x78350f); cBody.position.y = 0.26;
+          const cBand = makeBox(1.18, 0.09, 0.88, 0xd4af37, { metalness: 0.75, roughness: 0.25 }); cBand.position.y = 0.46;
+          const lock = makeBox(0.14, 0.16, 0.04, 0xfbbf24, { metalness: 0.8, roughness: 0.2 }); lock.position.set(0, 0.4, 0.44);
+          const gold = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.85, roughness: 0.25, emissive: 0xb45309, emissiveIntensity: 0.3 }));
+          gold.position.y = 0.52; gold.scale.set(1.5, 0.5, 1.1);
+          g.add(cBody, cBand, lock, gold);
+          return { inner: g, bounds: [-0.6, 0.6, -0.45, 0.47], h: 0.7, walls: ALL_WALLS, drop: [0, 0.6, 0] };
+        },
+
+        kidsTower() {
+          const tower = new THREE.Group();
+          const blk1 = makeBox(0.65, 0.65, 0.65, 0xef4444); blk1.position.y = 0.325;
+          const blk2 = makeBox(0.55, 0.55, 0.55, 0xfacc15); blk2.position.set(0.04, 0.92, -0.02); blk2.rotation.y = 0.3;
+          const blk3 = new THREE.Mesh(new THREE.ConeGeometry(0.36, 0.6, 4), new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.6 }));
+          blk3.position.set(0.02, 1.48, 0); blk3.castShadow = true;
+          tower.add(blk1, blk2, blk3);
+          return { inner: tower, bounds: [-0.36, 0.36, -0.36, 0.36], h: 1.8, walls: ['back', 'left'] };
+        },
+
+        libShelf() {
+          const s = new THREE.Group();
+          const lBack = makeBox(2.2, 2.7, 0.08, 0x451a03); lBack.position.set(0, 1.35, -0.26);
+          s.add(lBack);
+          const bCols = [0x991b1b, 0x1e3a8a, 0x14532d, 0x92400e, 0x581c87];
+          [0.2, 0.85, 1.5, 2.15, 2.65].forEach((sy, idx) => {
+            const p = makeBox(2.2, 0.08, 0.55, 0x5c2e16); p.position.y = sy; s.add(p);
+            if (idx < 4) {
+              for (let k = 0; k < 10; k++) {
+                const bk = makeBox(0.14, 0.42 + (k % 3) * 0.05, 0.36, bCols[(k + idx) % bCols.length]);
+                bk.position.set(-0.92 + k * 0.19, sy + 0.25, 0.04); s.add(bk);
+              }
+            }
+          });
+          return {
+            inner: s, bounds: [-1.1, 1.1, -0.3, 0.28], h: 2.75, walls: ['back', 'left'], xray: true,
+            dust: [{ p: [0.4, 2.72, 0], label: '대형 서가 위 먼지' }]
+          };
+        }
+      };
+
+      // 이번 방에 놓을 가구 목록 (기본 가구 + 테마 소품 + 확률로 붙는 추가 가구)
+      function planRoomFurniture(theme) {
+        const tm = THEME_MESS[theme.id] || THEME_MESS.studio;
+        const ex = tm.extras || {};
+        const list = ['bed', 'wardrobe', 'desk', 'bookshelf', 'trashbin', 'plant'];
+        ['libShelf', 'toybox', 'chest'].forEach(id => { if (ex[id]) list.push(id); });
+        if (theme.id === 'kids') list.push('kidsTower');
+        ['kitchen', 'recycle', 'laundry', 'mirror'].forEach(id => { if (Math.random() < (ex[id] || 0)) list.push(id); });
+        return list;
+      }
+
       function buildLuxuryDecors3D() {
         clearGroup(decorGroup);
         aquariumFish = [];
+        const slot = (id) => layout.decorSlots[id];
+        const mountDecor = (grp, id) => {
+          const s = slot(id);
+          grp.position.set(s.x, 0, s.z); grp.rotation.y = s.rot; decorGroup.add(grp);
+        };
 
-        if (state.decors.painting) {
-          const art = new THREE.Group(); art.position.set(-2.9, 2.35, -4.96);
+        if (state.decors.painting && layout.wallFeatures.painting) {
+          const art = new THREE.Group(); mountOnWall(art, layout.wallFeatures.painting, 2.35);
+          const inner = new THREE.Group(); inner.position.z = 0.04; art.add(inner);
           const frame = makeBox(1.75, 1.25, 0.08, 0xd4af37, { metalness: 0.7, roughness: 0.25 });
           const canvasArt = makeBox(1.52, 1.02, 0.09, 0x1e3a8a, { castShadow: false });
           const sun = new THREE.Mesh(new THREE.CircleGeometry(0.24, 16), new THREE.MeshBasicMaterial({ color: 0xfde047 })); sun.position.set(0.32, 0.18, 0.05);
           const hill = makeBox(1.5, 0.35, 0.02, 0x10b981, { castShadow: false }); hill.position.set(0, -0.32, 0.045);
-          art.add(frame, canvasArt, sun, hill); decorGroup.add(art);
+          inner.add(frame, canvasArt, sun, hill); decorGroup.add(art);
         }
 
-        if (state.decors.aquarium) {
-          const aq = new THREE.Group(); aq.position.set(-4.2, 0, 0.05);
+        if (state.decors.aquarium && slot('aquarium')) {
+          const outer = new THREE.Group();
+          const aq = new THREE.Group(); aq.rotation.y = Math.PI / 2; outer.add(aq);
           const cabinet = makeBox(0.95, 0.9, 1.85, 0x1e293b); cabinet.position.y = 0.45;
           const tank = makeBox(0.86, 0.92, 1.76, 0x38bdf8, { transparent: true, opacity: 0.42, emissive: 0x0284c7, emissiveIntensity: 0.45, roughness: 0.1 }); tank.position.y = 1.36;
           const topLid = makeBox(0.92, 0.08, 1.82, 0x0f172a); topLid.position.y = 1.85;
@@ -1364,25 +1849,27 @@
             fish.rotation.x = Math.PI / 2; fish.position.set(-0.1 + i * 0.1, 1.2 + i * 0.18, (i - 1) * 0.4);
             aq.add(fish); aquariumFish.push({ mesh: fish, speed: 0.012 + i * 0.004, dir: 1, baseY: 1.2 + i * 0.16 });
           });
-          decorGroup.add(aq);
+          mountDecor(outer, 'aquarium');
         }
 
-        if (state.decors.sofa) {
-          const sofa = new THREE.Group(); sofa.position.set(2.8, 0, 1.3); sofa.rotation.y = -Math.PI / 2;
+        if (state.decors.sofa && slot('sofa')) {
+          const sofa = new THREE.Group();
           const sBase = makeBox(2.3, 0.42, 0.95, 0x7c2d12, { roughness: 0.55 }); sBase.position.y = 0.28;
           const sBack = makeBox(2.3, 0.72, 0.24, 0x7c2d12, { roughness: 0.55 }); sBack.position.set(0, 0.68, -0.36);
           const armL = makeBox(0.24, 0.6, 0.95, 0x7c2d12, { roughness: 0.55 }); armL.position.set(-1.05, 0.45, 0);
           const armR = makeBox(0.24, 0.6, 0.95, 0x7c2d12, { roughness: 0.55 }); armR.position.set(1.05, 0.45, 0);
-          sofa.add(sBase, sBack, armL, armR); decorGroup.add(sofa);
+          sofa.add(sBase, sBack, armL, armR);
+          mountDecor(sofa, 'sofa');
         }
 
-        if (state.decors.trophy) {
-          const tr = new THREE.Group(); tr.position.set(1.65, 0, -4.3);
+        if (state.decors.trophy && slot('trophy')) {
+          const tr = new THREE.Group();
           const ped = makeBox(0.62, 0.95, 0.62, 0x1e293b); ped.position.y = 0.475;
           const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.1, 0.42, 16), new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.85, roughness: 0.2, emissive: 0xd97706, emissiveIntensity: 0.25 }));
           cup.position.y = 1.22; cup.castShadow = true;
           const baseCup = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.12, 16), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.2 }));
-          baseCup.position.y = 1.0; tr.add(ped, baseCup, cup); decorGroup.add(tr);
+          baseCup.position.y = 1.0; tr.add(ped, baseCup, cup);
+          mountDecor(tr, 'trophy');
         }
       }
 
@@ -1392,6 +1879,11 @@
         xrayTargets = [];
         bookshelfSlotIdx = 0;
         chandelierGroup = null;
+        bedBlanketMesh = null; bedMessyRing = null; deskDrawerMesh = null; deskDrawerRing = null;
+        plantLeavesGroup = null; plantThirstyRing = null; trashBinLidMesh = null; wardrobeDoorR = null;
+        windowSmudgeMesh = null; mirrorSmudgeMesh = null; scribbleMesh = null;
+        layout = { furn: {}, zones: [], dustSpots: [], cobwebSpots: [], decorSlots: {}, wallFeatures: {}, stack: {} };
+        DROP_TARGETS = {};
 
         const baseRoom = ROOMS[state.roomId];
         const theme = getCurrentTheme();
@@ -1406,7 +1898,7 @@
         scene.background = new THREE.Color(room.bg);
         const roomSize = 10, wallH = 3.8, wallThick = 0.25;
 
-        // 1. Floor
+        // 1. 바닥
         const floorMesh = new THREE.Mesh(
           new THREE.BoxGeometry(roomSize, 0.25, roomSize),
           new THREE.MeshStandardMaterial({
@@ -1418,7 +1910,7 @@
         floorMesh.position.y = -0.125; floorMesh.receiveShadow = true;
         roomGroup.add(floorMesh);
 
-        // 2. Walls & Baseboards
+        // 2. 벽 & 걸레받이
         const wallMat = new THREE.MeshStandardMaterial({ color: room.wallColor, roughness: 0.88 });
         const backWall = new THREE.Mesh(new THREE.BoxGeometry(roomSize + wallThick, wallH, wallThick), wallMat);
         backWall.position.set(-wallThick / 2, wallH / 2, -roomSize / 2 - wallThick / 2); backWall.receiveShadow = true;
@@ -1429,36 +1921,7 @@
         const trimLeft = makeBox(0.06, 0.22, roomSize, trimColor, { castShadow: false, metalness: state.roomId === 3 ? 0.6 : 0 }); trimLeft.position.set(-roomSize / 2 + 0.03, 0.11, 0);
         roomGroup.add(backWall, leftWall, trimBack, trimLeft);
 
-        // 3. Room-Tier Panoramic Window with Custom View + Wipeable Glass Smudge!
-        const winW = state.roomId >= 2 ? 2.85 : (state.roomId === 1 ? 2.45 : 2.0);
-        const winH = state.roomId >= 2 ? 2.05 : (state.roomId === 1 ? 1.55 : 1.15);
-        const winY = state.roomId >= 2 ? 2.2 : 2.25;
-        const winGroup = new THREE.Group(); winGroup.position.set(2.95, winY, -roomSize / 2 + 0.03);
-
-        const viewTex = makeWindowViewTexture(room.viewStyle);
-        const glassMat = new THREE.MeshBasicMaterial({ map: viewTex });
-        const glass = new THREE.Mesh(new THREE.PlaneGeometry(winW, winH), glassMat);
-        glass.position.z = 0.025;
-        winGroup.add(glass);
-
-        // Wipeable window smudge overlay!
-        windowSmudgeMesh = new THREE.Mesh(
-          new THREE.PlaneGeometry(winW * 0.9, winH * 0.85),
-          new THREE.MeshBasicMaterial({ color: 0xd6d3d1, transparent: true, opacity: 0.58 })
-        );
-        windowSmudgeMesh.position.z = 0.04;
-        winGroup.add(windowSmudgeMesh);
-
-        const frameCol = state.roomId === 3 ? 0xd4af37 : (state.roomId === 2 ? 0x1e293b : 0xffffff);
-        const fTop = makeBox(winW + 0.16, 0.1, 0.1, frameCol); fTop.position.y = winH / 2;
-        const fBot = makeBox(winW + 0.22, 0.12, 0.16, frameCol); fBot.position.set(0, -winH / 2, 0.03);
-        const fL = makeBox(0.1, winH + 0.08, 0.1, frameCol); fL.position.x = -winW / 2 - 0.03;
-        const fR = makeBox(0.1, winH + 0.08, 0.1, frameCol); fR.position.x = winW / 2 + 0.03;
-        const fMid = makeBox(0.06, winH, 0.08, frameCol);
-        winGroup.add(fTop, fBot, fL, fR, fMid);
-        roomGroup.add(winGroup);
-
-        // Penthouse 3D Crystal Chandelier!
+        // 펜트하우스 샹들리에
         if (state.roomId === 3) {
           chandelierGroup = new THREE.Group();
           chandelierGroup.position.set(0, 3.6, 0);
@@ -1476,203 +1939,152 @@
           roomGroup.add(chandelierGroup);
         }
 
-        // 4. Rug
+        // 3. 러그 (크기·위치·방향 무작위)
         const rug = new THREE.Mesh(
-          new THREE.BoxGeometry(4.4, 0.035, 3.2),
+          new THREE.BoxGeometry(3.6 + Math.random() * 1.1, 0.035, 2.6 + Math.random() * 0.8),
           new THREE.MeshStandardMaterial({ map: makeRugTexture(room.rugColor), roughness: 0.95 })
         );
-        rug.position.set(0.1, 0.018, 0.65); rug.receiveShadow = true;
+        rug.position.set(0.25 + (Math.random() - 0.5) * 0.6, 0.018, 0.45 + (Math.random() - 0.5) * 0.6);
+        if (Math.random() < 0.35) rug.rotation.y = Math.PI / 2;
+        rug.receiveShadow = true;
         roomGroup.add(rug);
 
-        // 5. BED + Nightstand + Lamp
-        const bed = new THREE.Group(); bed.position.set(-3.2, 0, -3.1);
-        const bedBase = makeBox(2.35, 0.3, 3.05, room.woodColor); bedBase.position.y = 0.3; bed.add(bedBase);
-        [[-1.08, -1.42], [1.08, -1.42], [-1.08, 1.42], [1.08, 1.42]].forEach(([lx, lz]) => {
-          const leg = makeBox(0.14, 0.2, 0.14, room.woodColor); leg.position.set(lx, 0.1, lz); bed.add(leg);
-        });
-        const head = makeBox(2.4, 1.25, 0.16, state.roomId === 3 ? 0xd4af37 : room.woodColor, { metalness: state.roomId === 3 ? 0.55 : 0.06 });
-        head.position.set(0, 0.72, -1.5); bed.add(head);
-        const headPad = makeBox(2.15, 0.75, 0.08, 0xf3eee6, { roughness: 0.9 }); headPad.position.set(0, 0.85, -1.4); bed.add(headPad);
-        const mattress = makeBox(2.18, 0.34, 2.86, 0xfdfbf7, { roughness: 0.88 }); mattress.position.y = 0.6; bed.add(mattress);
-
-        bedBlanketMesh = new THREE.Group();
-        const blanket = makeBox(2.24, 0.36, 2.02, room.bedBlanket, { roughness: 0.85 });
-        const fold = makeBox(2.26, 0.12, 0.32, 0xffffff, { roughness: 0.9 }); fold.position.set(0, 0.16, -0.96);
-        bedBlanketMesh.add(blanket, fold);
-        bedBlanketMesh.position.set(0.14, 0.65, 0.44);
-        bedBlanketMesh.rotation.set(0.06, 0.18, -0.05);
-        bed.add(bedBlanketMesh);
-
-        bedMessyRing = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.68, 24), new THREE.MeshBasicMaterial({ color: 0xf59e0b, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }));
-        bedMessyRing.rotation.x = -Math.PI / 2; bedMessyRing.position.set(0, 0.96, 0.35);
-        bed.add(bedMessyRing);
-
-        [-0.55, 0.55].forEach(px => {
-          const pillow = makeBox(0.85, 0.22, 0.52, 0xffffff, { roughness: 0.9 });
-          pillow.position.set(px, 0.84, -1.06); pillow.rotation.x = 0.15; bed.add(pillow);
-        });
-        const stand = makeBox(0.75, 0.68, 0.72, room.woodColor); stand.position.set(1.62, 0.34, -1.12); bed.add(stand);
-        const standDrawer = makeBox(0.62, 0.22, 0.04, 0xffffff, { roughness: 0.6 }); standDrawer.position.set(1.62, 0.45, -0.75); bed.add(standDrawer);
-        const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.16, 0.24, 16), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.65, roughness: 0.3 }));
-        lampBase.position.set(1.62, 0.8, -1.12); lampBase.castShadow = true; bed.add(lampBase);
-        const lampShade = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.26, 0.32, 20), new THREE.MeshStandardMaterial({ color: 0xfff3d6, emissive: 0xffc864, emissiveIntensity: 0.7, roughness: 0.8 }));
-        lampShade.position.set(1.62, 1.06, -1.12); bed.add(lampShade);
-        const lampLight = new THREE.PointLight(0xffcf77, 0.75, 6); lampLight.position.set(1.62, 1.15, -1.12); bed.add(lampLight);
-        roomGroup.add(bed);
-
-        // 6. BOOKSHELF
-        const shelf = new THREE.Group(); shelf.position.set(0.1, 0, -4.3);
-        const shW = 2.1, shH = 2.45, shD = 0.62;
-        const shBack = makeBox(shW, shH, 0.06, room.woodColor); shBack.position.set(0, shH / 2, -shD / 2 + 0.03);
-        const shL = makeBox(0.09, shH, shD, room.woodColor); shL.position.set(-shW / 2 + 0.045, shH / 2, 0);
-        const shR = makeBox(0.09, shH, shD, room.woodColor); shR.position.set(shW / 2 - 0.045, shH / 2, 0);
-        shelf.add(shBack, shL, shR);
-        const bookCols = [0xef4444, 0x3b82f6, 0x10b981, 0xf59e0b, 0x8b5cf6, 0xec4899, 0x14b8a6, 0xf97316];
-        [0.12, 0.72, 1.32, 1.92, 2.42].forEach((sy, idx) => {
-          const plank = makeBox(shW, 0.08, shD, room.woodColor); plank.position.y = sy; shelf.add(plank);
-          if (idx < 4) {
-            let bx = -shW / 2 + 0.18;
-            const maxBooks = (idx === 1 || idx === 2) ? 4 : 8;
-            for (let b = 0; b < maxBooks; b++) {
-              const bw = 0.1 + ((b + idx) % 3) * 0.025;
-              const bh = 0.34 + ((b * 2 + idx) % 3) * 0.07;
-              if (bx + bw > shW / 2 - 0.14) break;
-              const book = makeBox(bw, bh, 0.38, bookCols[(b + idx * 3) % bookCols.length], { roughness: 0.75 });
-              book.position.set(bx + bw / 2, sy + 0.04 + bh / 2, 0.04);
-              shelf.add(book); bx += bw + 0.025;
-            }
+        // 4. 가구를 무작위 벽·위치에 배치
+        // 순서: 기본 가구 → 이미 산 인테리어 소품 → 테마/추가 가구 → 아직 안 산 소품 자리
+        const CORE = ['bed', 'wardrobe', 'desk', 'bookshelf', 'trashbin', 'plant'];
+        const area = s => (s.bounds[1] - s.bounds[0]) * (s.bounds[3] - s.bounds[2]);
+        const specs = planRoomFurniture(theme).map(id => Object.assign({ id }, FURN_BUILDERS[id](room)))
+          .concat(Object.entries(DECOR_SPECS).map(([id, ds]) => Object.assign({ id, decor: true }, ds)));
+        const rank = s => s.decor ? (state.decors && state.decors[s.id] ? 2 : 0) : (CORE.includes(s.id) ? 3 : 1);
+        specs.sort((a, b) => (rank(b) - rank(a)) || (area(b) - area(a)));
+        const placed = [];
+        for (const spec of specs) {
+          const pose = tryPlaceFurniture(spec, placed, true) || tryPlaceFurniture(spec, placed, false);
+          if (spec.decor) {
+            if (!pose) continue;
+            placed.push({ id: spec.id, box: pose.box, wall: pose.wall, h: spec.h });
+            layout.zones.push({ minX: pose.box[0], maxX: pose.box[1], minZ: pose.box[2], maxZ: pose.box[3], decorId: spec.id });
+            layout.decorSlots[spec.id] = pose;
+            continue;
           }
-        });
-        const miniPot = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.1, 0.2, 14), new THREE.MeshStandardMaterial({ color: 0xd97757, roughness: 0.8 })); miniPot.position.set(0.65, shH + 0.1, 0);
-        const miniLeaf = new THREE.Mesh(new THREE.DodecahedronGeometry(0.18, 0), new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.7 })); miniLeaf.position.set(0.65, shH + 0.28, 0);
-        shelf.add(miniPot, miniLeaf);
-        registerXrayGroup(shelf);
-        roomGroup.add(shelf);
-
-        // 7. DESK + Interactive Drawer + Monitor + Chair
-        const desk = new THREE.Group(); desk.position.set(3.05, 0, -3.55);
-        const topMesh = makeBox(2.45, 0.11, 1.25, room.woodColor); topMesh.position.y = 1.05; desk.add(topMesh);
-        [[-1.12, -0.52], [-1.12, 0.52]].forEach(([lx, lz]) => {
-          const leg = makeBox(0.1, 1.02, 0.1, 0x334155, { metalness: 0.35, roughness: 0.4 }); leg.position.set(lx, 0.51, lz); desk.add(leg);
-        });
-        const ped = makeBox(0.72, 1.0, 1.12, room.woodColor); ped.position.set(0.82, 0.5, 0); desk.add(ped);
-
-        deskDrawerMesh = new THREE.Group(); deskDrawerMesh.position.set(0.82, 0.84, 0.56);
-        const drFront = makeBox(0.66, 0.22, 0.06, room.woodColor);
-        const drHandle = makeBox(0.24, 0.04, 0.06, 0xfbbf24, { metalness: 0.75, roughness: 0.2 }); drHandle.position.z = 0.04;
-        deskDrawerMesh.add(drFront, drHandle); desk.add(deskDrawerMesh);
-
-        deskDrawerRing = new THREE.Mesh(new THREE.RingGeometry(0.18, 0.25, 18), new THREE.MeshBasicMaterial({ color: 0xfbbf24, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }));
-        deskDrawerRing.position.set(0.82, 0.84, 0.65); desk.add(deskDrawerRing);
-
-        [0.24, 0.54].forEach(dy => {
-          const handle = makeBox(0.24, 0.04, 0.05, 0xe2e8f0, { metalness: 0.7, roughness: 0.25 }); handle.position.set(0.82, dy, 0.58); desk.add(handle);
-        });
-        const standFoot = makeBox(0.45, 0.04, 0.3, 0x1e293b, { metalness: 0.5 }); standFoot.position.set(-0.2, 1.12, -0.25);
-        const standNeck = makeBox(0.08, 0.35, 0.08, 0x1e293b, { metalness: 0.5 }); standNeck.position.set(-0.2, 1.3, -0.28);
-        const bezel = makeBox(1.18, 0.68, 0.06, 0x0f172a, { roughness: 0.35 }); bezel.position.set(-0.2, 1.62, -0.22);
-        const screen = makeBox(1.1, 0.6, 0.02, 0x38bdf8, { emissive: 0x0ea5e9, emissiveIntensity: 0.55, roughness: 0.2, castShadow: false }); screen.position.set(-0.2, 1.62, -0.185);
-        const kb = makeBox(0.62, 0.03, 0.22, 0x334155); kb.position.set(-0.22, 1.12, 0.2);
-        const mouseObj = makeBox(0.11, 0.03, 0.16, 0x475569); mouseObj.position.set(0.24, 1.12, 0.22);
-        desk.add(standFoot, standNeck, bezel, screen, kb, mouseObj);
-
-        const chair = new THREE.Group(); chair.position.set(-0.25, 0, 0.92);
-        const seat = makeBox(0.76, 0.12, 0.72, 0x334155, { roughness: 0.8 }); seat.position.y = 0.65;
-        const backRest = makeBox(0.74, 0.85, 0.12, 0x1e293b, { roughness: 0.8 }); backRest.position.set(0, 1.08, 0.32);
-        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.55, 12), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7, roughness: 0.3 })); stem.position.y = 0.34;
-        const wheelBase = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.38, 0.08, 5), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 })); wheelBase.position.y = 0.06;
-        chair.add(seat, backRest, stem, wheelBase); desk.add(chair);
-        roomGroup.add(desk);
-
-        // 8. 3D TRASH BIN (Lid hinges open when trash approaches!)
-        const bin = new THREE.Group(); bin.position.set(4.15, 0, -1.75);
-        const binBody = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.33, 0.88, 18), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.35, roughness: 0.45 }));
-        binBody.position.y = 0.44; binBody.castShadow = true; binBody.receiveShadow = true;
-        const binRim = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.04, 10, 24), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.4, roughness: 0.35 }));
-        binRim.rotation.x = Math.PI / 2; binRim.position.y = 0.88;
-        const lidPivot = new THREE.Group(); lidPivot.position.set(0, 0.92, -0.4);
-        const lidDisk = new THREE.Mesh(new THREE.CylinderGeometry(0.43, 0.43, 0.07, 18), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.4, roughness: 0.4 }));
-        lidDisk.position.set(0, 0, 0.4); lidDisk.castShadow = true;
-        lidPivot.add(lidDisk);
-        trashBinLidMesh = lidPivot;
-        bin.add(binBody, binRim, lidPivot);
-        roomGroup.add(bin);
-
-        // 9. WARDROBE (X-ray capable + proximity door opening!)
-        const ward = new THREE.Group(); ward.position.set(-4.2, 0, 2.85);
-        const wBody = makeBox(1.15, 2.85, 2.35, 0x475569, { roughness: 0.65 }); wBody.position.y = 1.425;
-        const doorL = makeBox(0.06, 2.58, 1.06, 0x64748b, { roughness: 0.6 }); doorL.position.set(0.58, 1.42, -0.56);
-        const knobL = makeBox(0.06, 0.32, 0.05, 0xfbbf24, { metalness: 0.75, roughness: 0.25 }); knobL.position.set(0.63, 1.38, -0.12);
-        const doorPivot = new THREE.Group(); doorPivot.position.set(0.58, 1.42, 1.09);
-        const doorR = makeBox(0.06, 2.58, 1.06, 0x64748b, { roughness: 0.6 }); doorR.position.set(0, 0, -0.53);
-        const knobR = makeBox(0.06, 0.32, 0.05, 0xfbbf24, { metalness: 0.75, roughness: 0.25 }); knobR.position.set(0.05, -0.04, -0.97);
-        doorPivot.add(doorR, knobR); wardrobeDoorR = doorPivot;
-        const crown = makeBox(1.24, 0.12, 2.45, 0x334155); crown.position.y = 2.88;
-        ward.add(wBody, doorL, knobL, doorPivot, crown);
-        registerXrayGroup(ward);
-        roomGroup.add(ward);
-
-        // 10. Interactive Corner Houseplant (Click to water!)
-        const plant = new THREE.Group(); plant.position.set(4.05, 0, 3.7);
-        const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.3, 0.62, 18), new THREE.MeshStandardMaterial({ color: 0xc26d4f, roughness: 0.82 }));
-        pot.position.y = 0.31; pot.castShadow = true;
-        const soil = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.05, 16), new THREE.MeshStandardMaterial({ color: 0x3f2e21, roughness: 1 }));
-        soil.position.y = 0.61;
-        plantLeavesGroup = new THREE.Group();
-        const leafMat = new THREE.MeshStandardMaterial({ color: 0x65a30d, roughness: 0.7 });
-        for (let i = 0; i < 7; i++) {
-          const ang = (i / 7) * Math.PI * 2;
-          const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.95, 6), leafMat);
-          leaf.position.set(Math.cos(ang) * 0.22, 1.05 + (i % 2) * 0.18, Math.sin(ang) * 0.22);
-          leaf.rotation.z = -Math.cos(ang) * 0.55; leaf.rotation.x = Math.sin(ang) * 0.55; leaf.castShadow = true;
-          plantLeavesGroup.add(leaf);
+          if (!pose) { disposeObject(spec.inner); continue; }
+          const outer = new THREE.Group();
+          spec.inner.position.set(-(spec.bounds[0] + spec.bounds[1]) / 2, 0, -(spec.bounds[2] + spec.bounds[3]) / 2);
+          outer.add(spec.inner);
+          outer.position.set(pose.x, 0, pose.z); outer.rotation.y = pose.rot;
+          roomGroup.add(outer);
+          if (spec.xray) registerXrayGroup(spec.inner);
+          placed.push({ id: spec.id, box: pose.box, wall: pose.wall, h: spec.h });
+          layout.zones.push({ minX: pose.box[0], maxX: pose.box[1], minZ: pose.box[2], maxZ: pose.box[3] });
+          layout.furn[spec.id] = { outer, inner: spec.inner, spec };
+          if (spec.onMount) spec.onMount();
         }
-        plantThirstyRing = new THREE.Mesh(new THREE.RingGeometry(0.44, 0.54, 24), new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }));
-        plantThirstyRing.rotation.x = -Math.PI / 2; plantThirstyRing.position.y = 0.05;
-        plant.add(pot, soil, plantLeavesGroup, plantThirstyRing);
-        roomGroup.add(plant);
+        roomGroup.updateMatrixWorld(true);
 
-        // 11. Theme-Specific 3D Concept Props (Castle Torches & Chest, Kid's Toy Tower, Library Wall Shelves!)
+        for (const [id, f] of Object.entries(layout.furn)) {
+          const sp = f.spec;
+          if (sp.drop && DROP_INFO[id]) {
+            const w = furnWorld(id, sp.drop);
+            DROP_TARGETS[id] = { x: w.x, y: w.y, z: w.z, radius: DROP_INFO[id].radius, label: DROP_INFO[id].label };
+          }
+          (sp.dust || []).forEach(dd => {
+            const w = furnWorld(id, dd.p);
+            layout.dustSpots.push({ x: w.x, y: w.y, z: w.z, label: dd.label });
+          });
+        }
+        if (DROP_TARGETS.trashbin && !layout.furn.recycle) DROP_TARGETS.trashbin.label = '🗑️ 쓰레기통에 버리기';
+
+        // 5. 벽에 거는 것들의 자리 (큰 가구 뒤에 숨지 않게)
+        const wallSpans = { back: [], left: [] };
+        placed.forEach(p => {
+          if (p.wall === 'back') wallSpans.back.push({ a: p.box[0], b: p.box[1], h: p.h || 1 });
+          else if (p.wall === 'left') wallSpans.left.push({ a: p.box[2], b: p.box[3], h: p.h || 1 });
+        });
+        const pickWallSpot = (width, clearH) => {
+          for (let tries = 0; tries < 90; tries++) {
+            const wall = Math.random() < 0.5 ? 'back' : 'left';
+            const along = -ROOM_HALF + width / 2 + 0.3 + Math.random() * (2 * ROOM_HALF - width - 0.6);
+            const a = along - width / 2, b = along + width / 2;
+            if (wallSpans[wall].some(s => s.h > clearH && a < s.b + 0.1 && b > s.a - 0.1)) continue;
+            wallSpans[wall].push({ a, b, h: 99 });
+            return { wall, along };
+          }
+          return null;
+        };
+
+        // 창문 (닦을 수 있는 얼룩 포함)
+        const winW = state.roomId >= 2 ? 2.85 : (state.roomId === 1 ? 2.45 : 2.0);
+        const winH = state.roomId >= 2 ? 2.05 : (state.roomId === 1 ? 1.55 : 1.15);
+        const winY = state.roomId >= 2 ? 2.2 : 2.25;
+        const winSpot = pickWallSpot(winW + 0.4, winY - winH / 2 - 0.05) || { wall: 'back', along: 2.95 };
+        const winGroup = new THREE.Group(); mountOnWall(winGroup, winSpot, winY);
+        const glass = new THREE.Mesh(new THREE.PlaneGeometry(winW, winH), new THREE.MeshBasicMaterial({ map: makeWindowViewTexture(room.viewStyle) }));
+        glass.position.z = 0.025;
+        winGroup.add(glass);
+        windowSmudgeMesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(winW * 0.9, winH * 0.85),
+          new THREE.MeshBasicMaterial({ color: 0xd6d3d1, transparent: true, opacity: 0.58 })
+        );
+        windowSmudgeMesh.position.z = 0.04;
+        winGroup.add(windowSmudgeMesh);
+        const frameCol = state.roomId === 3 ? 0xd4af37 : (state.roomId === 2 ? 0x1e293b : 0xffffff);
+        const fTop = makeBox(winW + 0.16, 0.1, 0.1, frameCol); fTop.position.y = winH / 2;
+        const fBot = makeBox(winW + 0.22, 0.12, 0.16, frameCol); fBot.position.set(0, -winH / 2, 0.03);
+        const fL = makeBox(0.1, winH + 0.08, 0.1, frameCol); fL.position.x = -winW / 2 - 0.03;
+        const fR = makeBox(0.1, winH + 0.08, 0.1, frameCol); fR.position.x = winW / 2 + 0.03;
+        const fMid = makeBox(0.06, winH, 0.08, frameCol);
+        winGroup.add(fTop, fBot, fL, fR, fMid);
+        roomGroup.add(winGroup);
+
+        // 액자 자리 (상점에서 사면 걸림)
+        layout.wallFeatures.painting = pickWallSpot(1.9, 1.6);
+
+        // 거미줄이 생길 수 있는 높은 벽 구석
+        layout.cobwebSpots.push({ x: -ROOM_HALF + 0.14, y: 3.45, z: -ROOM_HALF + 0.14, rot: Math.PI / 4 });
+        for (let i = 0; i < 4; i++) {
+          const along = -4.2 + Math.random() * 8.4, y = 3.28 + Math.random() * 0.3;
+          if (i % 2 === 0) layout.cobwebSpots.push({ x: along, y, z: -ROOM_HALF + 0.05, rot: 0 });
+          else layout.cobwebSpots.push({ x: -ROOM_HALF + 0.05, y, z: along, rot: Math.PI / 2 });
+        }
+
+        // 6. 테마 전용 벽 장식
         if (theme.id === 'castle') {
-          // Medieval Wall Torches with Warm Firelight
-          [[-4.85, 2.5, -1.2], [-1.2, 2.5, -4.85]].forEach(([tx, ty, tz]) => {
-            const torch = new THREE.Group(); torch.position.set(tx, ty, tz);
+          for (let i = 0; i < 2; i++) {
+            const spot = pickWallSpot(0.5, 2.2);
+            if (!spot) continue;
+            const torch = new THREE.Group(); mountOnWall(torch, spot, 2.5);
+            const inner = new THREE.Group(); inner.position.z = 0.15; torch.add(inner);
             const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.04, 0.55, 8), new THREE.MeshStandardMaterial({ color: 0x44403c }));
             const flame = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 0), new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xfbbf24, emissiveIntensity: 1.2 }));
             flame.position.y = 0.34;
             const light = new THREE.PointLight(0xff9933, 0.7, 6.5); light.position.y = 0.4;
-            torch.add(stick, flame, light); roomGroup.add(torch);
-          });
-          // Medieval Treasure Chest near left wall
-          const chest = new THREE.Group(); chest.position.set(-4.1, 0, -0.35);
-          const cBody = makeBox(0.85, 0.52, 1.15, 0x78350f); cBody.position.y = 0.26;
-          const cBand = makeBox(0.88, 0.09, 1.18, 0xd4af37, { metalness: 0.75, roughness: 0.25 }); cBand.position.y = 0.46;
-          chest.add(cBody, cBand); roomGroup.add(chest);
+            inner.add(stick, flame, light); roomGroup.add(torch);
+          }
         } else if (theme.id === 'kids') {
-          // Colorful Giant Toy Block Tower & Pastel Toy Bin
-          const tower = new THREE.Group(); tower.position.set(-4.1, 0, -0.35);
-          const blk1 = makeBox(0.65, 0.65, 0.65, 0xef4444); blk1.position.y = 0.325;
-          const blk2 = makeBox(0.55, 0.55, 0.55, 0xfacc15); blk2.position.set(0.04, 0.92, -0.02); blk2.rotation.y = 0.3;
-          const blk3 = new THREE.Mesh(new THREE.ConeGeometry(0.36, 0.6, 4), new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.6 }));
-          blk3.position.set(0.02, 1.48, 0); blk3.castShadow = true;
-          tower.add(blk1, blk2, blk3); roomGroup.add(tower);
-        } else if (theme.id === 'library') {
-          // Extra Grand Library Bookshelf along left wall
-          const libShelf = new THREE.Group(); libShelf.position.set(-4.55, 0, -0.2); libShelf.rotation.y = Math.PI / 2;
-          const lBack = makeBox(2.2, 2.7, 0.08, 0x451a03); lBack.position.set(0, 1.35, -0.26);
-          libShelf.add(lBack);
-          const bCols = [0x991b1b, 0x1e3a8a, 0x14532d, 0x92400e, 0x581c87];
-          [0.2, 0.85, 1.5, 2.15, 2.65].forEach((sy, idx) => {
-            const p = makeBox(2.2, 0.08, 0.55, 0x5c2e16); p.position.y = sy; libShelf.add(p);
-            if (idx < 4) {
-              for (let k = 0; k < 10; k++) {
-                const bk = makeBox(0.14, 0.42 + (k % 3) * 0.05, 0.36, bCols[(k + idx) % bCols.length]);
-                bk.position.set(-0.92 + k * 0.19, sy + 0.25, 0.04); libShelf.add(bk);
+          // 지워야 하는 벽 낙서
+          const spot = pickWallSpot(1.7, 0);
+          if (spot) {
+            const c = document.createElement('canvas'); c.width = 256; c.height = 144;
+            const g2 = c.getContext('2d'); g2.lineCap = 'round'; g2.lineJoin = 'round';
+            const cols = ['#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#ec4899'];
+            for (let s = 0; s < 9; s++) {
+              g2.strokeStyle = cols[s % cols.length]; g2.lineWidth = 5 + Math.random() * 5;
+              g2.beginPath();
+              let x = 20 + Math.random() * 216, y = 20 + Math.random() * 104;
+              g2.moveTo(x, y);
+              for (let k = 0; k < 4; k++) {
+                const nx = 10 + Math.random() * 236, ny = 10 + Math.random() * 124;
+                g2.quadraticCurveTo((x + nx) / 2 + (Math.random() - 0.5) * 80, (y + ny) / 2 + (Math.random() - 0.5) * 80, nx, ny);
+                x = nx; y = ny;
               }
+              g2.stroke();
             }
-          });
-          registerXrayGroup(libShelf);
-          roomGroup.add(libShelf);
+            g2.strokeStyle = '#f59e0b'; g2.lineWidth = 6; g2.beginPath(); g2.arc(205, 38, 18, 0, Math.PI * 2); g2.stroke();
+            const sg = new THREE.Group(); mountOnWall(sg, spot, 0.95);
+            const sm = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.85), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, opacity: 1 }));
+            sm.position.z = 0.02; sg.add(sm); roomGroup.add(sg);
+            scribbleMesh = sm;
+          }
         }
 
         buildLuxuryDecors3D();
@@ -1681,19 +2093,58 @@
       // ============================================================
       // 8. 3D Item Meshes & Spawning
       // ============================================================
-      function createTrashMesh(kind) {
+      function createItemRing(g, color, r = 0.44) {
+        const ring = new THREE.Mesh(new THREE.RingGeometry(r, r + 0.08, 24), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, transparent: true, opacity: 0.8 }));
+        ring.rotation.x = -Math.PI / 2; ring.position.y = 0.025;
+        g.add(ring); g.userData.ring = ring;
+        return ring;
+      }
+
+      function createTrashMesh(kind, folded = true) {
         const g = new THREE.Group();
         if (kind === 'can') {
           const can = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.34, 14), new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.55, roughness: 0.3 }));
           can.rotation.z = Math.PI / 2.2; can.position.y = 0.14; can.castShadow = true; g.add(can);
         } else if (kind === 'box') {
-          const box = makeBox(0.55, 0.42, 0.48, 0xc2935b, { roughness: 0.9 }); box.position.y = 0.21;
-          const tape = makeBox(0.56, 0.04, 0.1, 0xe7d3b0, { castShadow: false }); tape.position.y = 0.42;
-          g.add(box, tape);
+          if (folded) {
+            const flat = makeBox(0.72, 0.05, 0.56, 0xc2935b, { roughness: 0.9 }); flat.position.y = 0.03;
+            const tape = makeBox(0.72, 0.012, 0.1, 0xe7d3b0, { castShadow: false }); tape.position.y = 0.06;
+            g.add(flat, tape);
+          } else {
+            const box = makeBox(0.55, 0.42, 0.48, 0xc2935b, { roughness: 0.9 }); box.position.y = 0.21;
+            const tape = makeBox(0.56, 0.04, 0.1, 0xe7d3b0, { castShadow: false }); tape.position.y = 0.42;
+            g.add(box, tape);
+          }
         } else if (kind === 'pizza') {
           const pbox = makeBox(0.62, 0.1, 0.62, 0xf8fafc, { roughness: 0.85 }); pbox.position.y = 0.05;
           const label = makeBox(0.32, 0.02, 0.32, 0xdc2626, { castShadow: false }); label.position.y = 0.105;
           g.add(pbox, label);
+        } else if (kind === 'tissue') {
+          const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1 });
+          [[0, 0.12, 0, 0.14], [0.15, 0.09, 0.06, 0.11], [-0.1, 0.08, 0.12, 0.1]].forEach(([x, y, z, r]) => {
+            const p = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 0), mat); p.position.set(x, y, z); p.castShadow = true; g.add(p);
+          });
+        } else if (kind === 'banana') {
+          const peel = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.055, 8, 16, Math.PI), new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.6 }));
+          peel.rotation.x = -Math.PI / 2; peel.position.y = 0.06; peel.castShadow = true;
+          const tip = makeBox(0.06, 0.06, 0.08, 0x713f12); tip.position.set(0.2, 0.06, 0);
+          const flap = makeBox(0.16, 0.03, 0.08, 0xeab308); flap.position.set(-0.24, 0.04, 0.08); flap.rotation.y = 0.6;
+          g.add(peel, tip, flap);
+        } else if (kind === 'ramen') {
+          const ang = Math.PI / 2.3;
+          const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.12, 0.26, 16, 1, true), new THREE.MeshStandardMaterial({ color: 0xfafaf9, roughness: 0.7, side: THREE.DoubleSide }));
+          cup.rotation.z = ang; cup.position.y = 0.16; cup.castShadow = true;
+          const band = new THREE.Mesh(new THREE.CylinderGeometry(0.168, 0.152, 0.07, 16, 1, true), new THREE.MeshStandardMaterial({ color: 0xdc2626, side: THREE.DoubleSide }));
+          band.rotation.z = ang; band.position.set(-Math.sin(ang) * 0.06, 0.16 + Math.cos(ang) * 0.06, 0);
+          const lid = makeBox(0.2, 0.01, 0.2, 0xf59e0b, { castShadow: false }); lid.position.set(0.3, 0.01, 0.1); lid.rotation.y = 0.5;
+          g.add(cup, band, lid);
+        } else if (kind === 'bottle') {
+          const bodyMat = new THREE.MeshStandardMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.6, roughness: 0.1 });
+          const body = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.42, 14), bodyMat); body.rotation.z = Math.PI / 2; body.position.y = 0.1;
+          const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.09, 0.1, 12), bodyMat); neck.rotation.z = Math.PI / 2; neck.position.set(-0.26, 0.1, 0);
+          const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.05, 12), new THREE.MeshStandardMaterial({ color: 0x2563eb })); cap.rotation.z = Math.PI / 2; cap.position.set(-0.335, 0.1, 0);
+          const label = new THREE.Mesh(new THREE.CylinderGeometry(0.102, 0.102, 0.14, 14, 1, true), new THREE.MeshStandardMaterial({ color: 0x16a34a, side: THREE.DoubleSide })); label.rotation.z = Math.PI / 2; label.position.y = 0.1;
+          g.add(body, neck, cap, label);
         } else {
           const paper = new THREE.Mesh(new THREE.IcosahedronGeometry(0.22, 0), new THREE.MeshStandardMaterial({ color: 0xfefce8, roughness: 0.9 }));
           paper.position.y = 0.2; paper.castShadow = true; g.add(paper);
@@ -1728,25 +2179,79 @@
           g.add(createClothesMesh(folded));
         } else if (kind === 'cushion') {
           const cush = makeBox(0.54, 0.22, 0.54, 0xf59e0b, { roughness: 0.9 }); cush.position.y = 0.13; cush.rotation.z = 0.12; g.add(cush);
+        } else if (kind === 'socks') {
+          const col = [0xf8fafc, 0x1f2937, 0xef4444, 0x60a5fa][Math.floor(Math.random() * 4)];
+          [[-0.1, 0.25], [0.12, -0.3]].forEach(([x, ry]) => {
+            const leg = makeBox(0.13, 0.06, 0.3, col, { roughness: 0.95 }); leg.position.set(x, 0.03, 0); leg.rotation.y = ry;
+            const foot = makeBox(0.13, 0.06, 0.16, col, { roughness: 0.95 }); foot.position.set(x + Math.sin(ry) * 0.17, 0.03, 0.2); foot.rotation.y = ry + 1.2;
+            g.add(leg, foot);
+          });
+        } else if (kind === 'towel') {
+          const t1 = makeBox(0.62, 0.05, 0.42, 0x14b8a6, { roughness: 1 }); t1.position.y = 0.03; t1.rotation.y = 0.3;
+          const t2 = makeBox(0.4, 0.07, 0.3, 0x2dd4bf, { roughness: 1 }); t2.position.set(0.06, 0.08, 0.02); t2.rotation.y = -0.4; t2.rotation.z = 0.12;
+          g.add(t1, t2);
+        } else if (kind === 'mug') {
+          const mugMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.4 });
+          const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.1, 0.2, 16), mugMat); mug.position.y = 0.1; mug.castShadow = true;
+          const coffee = new THREE.Mesh(new THREE.CircleGeometry(0.095, 16), new THREE.MeshStandardMaterial({ color: 0x5b3716 })); coffee.rotation.x = -Math.PI / 2; coffee.position.y = 0.201;
+          const handle = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.018, 6, 12), mugMat); handle.position.set(0.12, 0.1, 0);
+          g.add(mug, coffee, handle);
+        } else if (kind === 'dishes') {
+          const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.2, 0.04, 20), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 })); plate.position.y = 0.02; plate.castShadow = true;
+          const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xe0f2fe, roughness: 0.35, side: THREE.DoubleSide })); bowl.position.set(0.05, 0.2, 0);
+          const sauce = new THREE.Mesh(new THREE.CircleGeometry(0.1, 12), new THREE.MeshStandardMaterial({ color: 0xb91c1c })); sauce.rotation.x = -Math.PI / 2; sauce.position.set(-0.1, 0.045, 0.08);
+          const chop = makeBox(0.02, 0.02, 0.4, 0x92400e); chop.position.set(0.12, 0.06, 0); chop.rotation.y = 0.3;
+          g.add(plate, bowl, sauce, chop);
+        } else if (kind === 'toys') {
+          const c1 = makeBox(0.22, 0.22, 0.22, 0xef4444); c1.position.set(-0.12, 0.11, 0); c1.rotation.y = 0.4;
+          const c2 = makeBox(0.18, 0.18, 0.18, 0x3b82f6); c2.position.set(0.14, 0.09, 0.1); c2.rotation.y = -0.3;
+          const ball = new THREE.Mesh(new THREE.SphereGeometry(0.11, 14, 10), new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.5 })); ball.position.set(0.05, 0.11, -0.16); ball.castShadow = true;
+          g.add(c1, c2, ball);
+        } else if (kind === 'coins') {
+          const gm = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.85, roughness: 0.25, emissive: 0xb45309, emissiveIntensity: 0.25 });
+          for (let k = 0; k < 6; k++) {
+            const c = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.025, 14), gm);
+            c.position.set((Math.random() - 0.5) * 0.45, 0.013 + (k < 2 ? k * 0.026 : 0), (Math.random() - 0.5) * 0.45);
+            if (k >= 2) c.rotation.x = (Math.random() - 0.5) * 0.4;
+            g.add(c);
+          }
+          const pouch = new THREE.Mesh(new THREE.SphereGeometry(0.15, 12, 10), new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.9 }));
+          pouch.scale.set(1, 0.8, 1); pouch.position.set(0.12, 0.12, 0.1); pouch.castShadow = true; g.add(pouch);
+        } else if (kind === 'scroll') {
+          const roll = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.5, 12), new THREE.MeshStandardMaterial({ color: 0xe7d8b1, roughness: 0.85 })); roll.rotation.z = Math.PI / 2; roll.position.set(0, 0.06, -0.15); roll.castShadow = true;
+          const sheet = makeBox(0.48, 0.01, 0.34, 0xf1e6c8, { roughness: 0.9 }); sheet.position.set(0, 0.01, 0.05);
+          const ink = makeBox(0.3, 0.012, 0.02, 0x44403c, { castShadow: false }); ink.position.set(0, 0.02, 0.02);
+          g.add(roll, sheet, ink);
         } else {
           const base = makeBox(0.56, 0.04, 0.4, 0x94a3b8, { metalness: 0.55, roughness: 0.3 }); base.position.y = 0.02;
           const lid = makeBox(0.56, 0.36, 0.03, 0x475569, { metalness: 0.5, roughness: 0.35 }); lid.position.set(0, 0.18, -0.18); lid.rotation.x = -0.25;
           g.add(base, lid);
         }
-        const ring = new THREE.Mesh(
-          new THREE.RingGeometry(0.44, 0.52, 24),
-          new THREE.MeshBasicMaterial({ color: (kind === 'clothes' && !folded) ? 0xec4899 : 0x6366f1, side: THREE.DoubleSide, transparent: true, opacity: 0.8 })
-        );
-        ring.rotation.x = -Math.PI / 2; ring.position.y = 0.025;
-        g.add(ring); g.userData.ring = ring;
+        createItemRing(g, (kind === 'clothes' && !folded) ? 0xec4899 : 0x6366f1);
         return g;
       }
 
-      function createFloorDustMesh() {
+      // 쓰레기는 분리수거 대상이면 초록 링, 접어야 하면 주황 링으로 힌트를 준다
+      function createMessMesh(type, kind, folded) {
+        if (type !== 'trash') return createTidyMesh(kind, folded);
+        const g = createTrashMesh(kind, folded);
+        const def = TRASH_TYPES.find(t => t.kind === kind);
+        if (def && def.needsFold && !folded) createItemRing(g, 0xf97316, 0.4);
+        else if (def && def.bin === 'recycle' && layout.furn.recycle) createItemRing(g, 0x22c55e, 0.38);
+        return g;
+      }
+
+      function createFloorDustMesh(color = 0x9ca3af, kind = 'dust') {
         const g = new THREE.Group();
-        const mat = new THREE.MeshStandardMaterial({ color: 0x9ca3af, roughness: 1 });
-        [[0, 0.11, 0, 0.15], [0.13, 0.08, 0.07, 0.11], [-0.11, 0.09, -0.05, 0.12]].forEach(([x, y, z, r]) => {
-          const puff = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 0), mat); puff.position.set(x, y, z); puff.castShadow = true; g.add(puff);
+        const glitter = kind === 'glitter';
+        const mat = new THREE.MeshStandardMaterial({ color, roughness: 1, emissive: glitter ? color : 0x000000, emissiveIntensity: glitter ? 0.45 : 0 });
+        const fine = kind === 'crumbs' || glitter || kind === 'sand';
+        const puffs = fine
+          ? Array.from({ length: 8 }, () => [(Math.random() - 0.5) * 0.42, 0.04, (Math.random() - 0.5) * 0.42, 0.04 + Math.random() * 0.04])
+          : [[0, 0.11, 0, 0.15], [0.13, 0.08, 0.07, 0.11], [-0.11, 0.09, -0.05, 0.12]];
+        puffs.forEach(([x, y, z, r]) => {
+          const puff = new THREE.Mesh(glitter ? new THREE.OctahedronGeometry(r, 0) : new THREE.DodecahedronGeometry(r, 0), mat);
+          puff.position.set(x, y, z); puff.castShadow = !glitter; g.add(puff);
         });
         return g;
       }
@@ -1762,15 +2267,112 @@
         return g;
       }
 
-      function createSpillMesh() {
+      // 벽 높은 곳에 붙은 거미줄 (로컬 xy 평면, 벽과 나란히)
+      function createCobwebMesh() {
         const g = new THREE.Group();
-        const mat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.15, metalness: 0.15, transparent: true, opacity: 0.82 });
-        const main = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.48, 0.02, 20), mat); main.position.y = 0.03;
-        const drop1 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.02, 14), mat); drop1.position.set(0.36, 0.03, 0.18);
-        const drop2 = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.16, 0.02, 12), mat); drop2.position.set(-0.32, 0.03, -0.2);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xf5f5f4, transparent: true, opacity: 0.85, side: THREE.DoubleSide });
+        for (let k = 0; k < 8; k++) {
+          const a = (k / 8) * Math.PI * 2;
+          const thread = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.42, 0.006), mat);
+          thread.position.set(Math.cos(a) * 0.21, Math.sin(a) * 0.21, 0); thread.rotation.z = a - Math.PI / 2;
+          g.add(thread);
+        }
+        [0.12, 0.24, 0.36].forEach(r => {
+          const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.007, 3, 24), mat); g.add(ring);
+        });
+        const spider = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), new THREE.MeshStandardMaterial({ color: 0x1c1917 }));
+        spider.position.set(0.06, -0.09, 0.03); g.add(spider);
+        return g;
+      }
+
+      function createSpillMesh(color = 0x78350f, kind = 'coffee') {
+        const g = new THREE.Group();
+        if (kind === 'crayon') {
+          const cols = [0x8b5cf6, 0xef4444, 0x22c55e, 0xf59e0b];
+          for (let k = 0; k < 5; k++) {
+            const s = makeBox(0.5 + Math.random() * 0.3, 0.012, 0.05, cols[k % cols.length], { castShadow: false });
+            s.position.set((Math.random() - 0.5) * 0.3, 0.02, (Math.random() - 0.5) * 0.5); s.rotation.y = Math.random() * Math.PI;
+            g.add(s);
+          }
+        } else {
+          const isWax = kind === 'wax';
+          const mat = new THREE.MeshStandardMaterial({ color, roughness: isWax ? 0.55 : 0.15, metalness: isWax ? 0 : 0.15, transparent: true, opacity: isWax ? 0.95 : 0.82 });
+          const th = isWax ? 0.05 : 0.02;
+          const main = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.48, th, 20), mat); main.position.y = 0.03;
+          const drop1 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, th, 14), mat); drop1.position.set(0.36, 0.03, 0.18);
+          const drop2 = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.16, th, 12), mat); drop2.position.set(-0.32, 0.03, -0.2);
+          g.add(main, drop1, drop2);
+        }
         const ring = new THREE.Mesh(new THREE.RingGeometry(0.48, 0.56, 24), new THREE.MeshBasicMaterial({ color: 0x0ea5e9, side: THREE.DoubleSide, transparent: true, opacity: 0.7 }));
-        ring.rotation.x = -Math.PI / 2; ring.position.y = 0.042;
-        g.add(main, drop1, drop2, ring);
+        ring.rotation.x = -Math.PI / 2; ring.position.y = 0.06;
+        g.add(ring);
+        return g;
+      }
+
+      function createFootprintMesh(color, left) {
+        const g = new THREE.Group();
+        const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.9, transparent: true, opacity: 0.9 });
+        const sx = left ? -0.1 : 0.1;
+        const sole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.015, 14), mat); sole.scale.set(1, 1, 1.6); sole.position.set(sx, 0.02, -0.05);
+        const heel = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.015, 12), mat); heel.position.set(sx, 0.02, 0.17);
+        const ring = new THREE.Mesh(new THREE.RingGeometry(0.3, 0.35, 20), new THREE.MeshBasicMaterial({ color: 0x0ea5e9, side: THREE.DoubleSide, transparent: true, opacity: 0.5 }));
+        ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03;
+        g.add(sole, heel, ring);
+        return g;
+      }
+
+      // 쓰러진 물건: body를 옆으로 눕혀 두고, 세우면 똑바로 선다
+      function createKnockedMesh(kind) {
+        const g = new THREE.Group();
+        const body = new THREE.Group();
+        let lieY = 0.28, len = 1.4;
+        if (kind === 'lamp') {
+          const base = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.06, 18), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.5, roughness: 0.4 })); base.position.y = 0.03;
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.25, 10), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.7, roughness: 0.3 })); pole.position.y = 0.66;
+          const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.28, 0.32, 18), new THREE.MeshStandardMaterial({ color: 0xfff3d6, emissive: 0xffc864, emissiveIntensity: 0.5, roughness: 0.8 })); shade.position.y = 1.36;
+          body.add(base, pole, shade); lieY = 0.28; len = 1.52;
+        } else if (kind === 'stool') {
+          const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.07, 18), new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 })); seat.position.y = 0.62;
+          body.add(seat);
+          for (let k = 0; k < 3; k++) {
+            const a = (k / 3) * Math.PI * 2;
+            const leg = makeBox(0.05, 0.6, 0.05, 0x78350f); leg.position.set(Math.cos(a) * 0.19, 0.3, Math.sin(a) * 0.19); body.add(leg);
+          }
+          lieY = 0.28; len = 0.66;
+        } else {
+          const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.25, 0.06, 18), new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.4 })); base.position.y = 0.03;
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.8, 10), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4 })); pole.position.y = 0.43;
+          const head = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.12, 22), new THREE.MeshStandardMaterial({ color: 0x7dd3fc, transparent: true, opacity: 0.75, roughness: 0.3 })); head.rotation.x = Math.PI / 2; head.position.y = 0.98;
+          const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.14, 12), new THREE.MeshStandardMaterial({ color: 0x0284c7 })); hub.rotation.x = Math.PI / 2; hub.position.y = 0.98;
+          body.add(base, pole, head, hub); lieY = 0.31; len = 1.28;
+        }
+        body.traverse(o => { if (o.isMesh) o.castShadow = true; });
+        g.add(body);
+        const ring = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.58, 24), new THREE.MeshBasicMaterial({ color: 0x6366f1, side: THREE.DoubleSide, transparent: true, opacity: 0.75 }));
+        ring.rotation.x = -Math.PI / 2; ring.position.y = 0.025; g.add(ring);
+        // +90° 회전하면 위쪽이 -x로 눕는다. 몸통 가운데가 원점에 오도록 +x로 밀어 둔다.
+        const side = Math.random() < 0.5 ? 1 : -1;
+        body.rotation.z = side * Math.PI / 2;
+        body.position.set(side * len / 2, lieY, 0);
+        g.userData = { body, ring };
+        g.rotation.y = Math.random() * Math.PI * 2;
+        return g;
+      }
+
+      function createPickupMesh(kind) {
+        const g = new THREE.Group();
+        if (kind === 'bill') {
+          const b1 = makeBox(0.36, 0.012, 0.17, 0x86efac, { roughness: 0.8, castShadow: false }); b1.position.y = 0.012; b1.rotation.y = 0.3;
+          const b2 = makeBox(0.36, 0.012, 0.17, 0x4ade80, { roughness: 0.8, castShadow: false }); b2.position.set(0.05, 0.026, 0.04); b2.rotation.y = -0.2;
+          g.add(b1, b2);
+        } else {
+          const cm = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9, roughness: 0.25 });
+          for (let k = 0; k < 3; k++) {
+            const c = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.02, 16), cm);
+            c.position.set((Math.random() - 0.5) * 0.3, 0.012, (Math.random() - 0.5) * 0.3); g.add(c);
+          }
+        }
+        createItemRing(g, 0xfacc15, 0.3);
         return g;
       }
 
@@ -1800,28 +2402,6 @@
         return g;
       }
 
-      function addOrganizedItemVisually(item) {
-        if (item.kind === 'books') {
-          const shelfY = (bookshelfSlotIdx < 4) ? 0.76 : 1.36;
-          const slotX = 0.1 + 0.05 + (bookshelfSlotIdx % 4) * 0.17;
-          const colors = [0x2563eb, 0xe11d48, 0x10b981, 0xf59e0b];
-          const b = makeBox(0.12, 0.42, 0.38, colors[bookshelfSlotIdx % colors.length]);
-          b.position.set(slotX, shelfY + 0.21, -4.26);
-          organizedGroup.add(b);
-          bookshelfSlotIdx++;
-        } else if (item.kind === 'cushion') {
-          const c = makeBox(0.48, 0.2, 0.48, 0xf59e0b, { roughness: 0.9 });
-          c.position.set(-3.2 + (Math.random() - 0.5) * 0.8, 0.88, -2.55); c.rotation.y = 0.2;
-          organizedGroup.add(c);
-        } else if (item.kind === 'laptop') {
-          const l = makeBox(0.5, 0.04, 0.36, 0x94a3b8, { metalness: 0.5 });
-          l.position.set(3.85, 1.13, -3.55);
-          organizedGroup.add(l);
-        } else if (item.kind === 'clothes') {
-          wardrobeOpenTimer = 35;
-        }
-      }
-
       function addRadarRingTo(mesh, y = 0.045) {
         const ring = new THREE.Mesh(new THREE.RingGeometry(0.48, 0.62, 24), new THREE.MeshBasicMaterial({ color: 0xf59e0b, side: THREE.DoubleSide, transparent: true, opacity: 0.9 }));
         ring.rotation.x = -Math.PI / 2; ring.position.y = y; ring.visible = false;
@@ -1849,103 +2429,132 @@
         roomCleared = false;
         combo = 0; comboTimer = 0;
 
-        // Anti-Exploit Day-Gated Chores: only reset once per new day (prevents theme/move infinite farming!)
-        bedMade = (state.lastBedDay === state.day);
-        drawerChecked = (state.lastDrawerDay === state.day);
-        plantWatered = (state.lastPlantDay === state.day);
-        windowCleaned = false; windowHp = 100;
+        const room = ROOMS[state.roomId];
+        const theme = getCurrentTheme();
         dayElapsedSec = 0;
         feverTriggeredToday = false;
         missionCompleted = false;
         currentMission = DAILY_MISSIONS[(state.day - 1) % DAILY_MISSIONS.length];
+        layout.stack = {};
+        tweens = [];
+        setupChores();
+        binState = {};
+        ['trashbin', 'recycle'].forEach(id => { if (layout.furn[id]) binState[id] = { fill: 0, cap: randInt(4, 6) + state.roomId }; });
+        updateBinVisuals();
 
-        if (bedBlanketMesh) {
-          if (bedMade) { bedBlanketMesh.position.set(0, 0.62, 0.44); bedBlanketMesh.rotation.set(0, 0, 0); }
-          else { bedBlanketMesh.position.set(0.14, 0.65, 0.44); bedBlanketMesh.rotation.set(0.06, 0.18, -0.05); }
-        }
-        if (bedMessyRing) bedMessyRing.visible = !bedMade;
-        if (deskDrawerMesh) deskDrawerMesh.position.z = drawerChecked ? 0.88 : 0.56;
-        if (deskDrawerRing) deskDrawerRing.visible = !drawerChecked;
-        if (plantThirstyRing) plantThirstyRing.visible = !plantWatered;
-        if (plantLeavesGroup) plantLeavesGroup.scale.set(plantWatered ? 1.12 : 1, plantWatered ? 1.12 : 0.9, plantWatered ? 1.12 : 1);
-        if (windowSmudgeMesh) { windowSmudgeMesh.visible = true; windowSmudgeMesh.material.opacity = 0.58; }
-
-        const room = ROOMS[state.roomId];
-        const theme = getCurrentTheme();
+        const tm = THEME_MESS[theme.id] || THEME_MESS.studio;
+        const mult = room.ticketMult;
         const perkLotto = state.activePerk === 'hunter' ? 0.25 : 0;
         const lottoChance = Math.min(0.92, 0.28 + (state.upgrades.lottoRate || 0) * 0.07 + theme.lottoBonus + perkLotto);
-        const tCount = Math.max(2, room.trashCount + theme.trashMod);
-        const tdCount = Math.max(3, room.tidyCount + theme.tidyMod);
-        const fdCount = Math.max(3, room.floorDustCount + theme.dustMod);
-        const spCount = Math.max(1, room.spillCount + theme.spillMod);
+        const tCount = Math.max(2, room.trashCount + theme.trashMod + randInt(-1, 2));
+        const tdCount = Math.max(3, room.tidyCount + theme.tidyMod + randInt(-1, 2));
+        const fdCount = Math.max(2, room.floorDustCount + theme.dustMod + randInt(-2, 1));
+        const spCount = Math.max(1, room.spillCount + theme.spillMod + randInt(-1, 1));
+        const sdCount = Math.max(2, room.surfaceDustCount + Math.round(theme.dustMod / 2) + randInt(-1, 1));
+        const webCount = Math.max(0, (tm.cobwebs || 0) + randInt(-1, 1));
+        const knCount = randInt(0, 2);
+        const puCount = randInt(1, 3);
 
+        let seq = 0;
+        const addItem = (obj, mesh, pos, y = 0) => {
+          mesh.position.set(pos.x, y, pos.z);
+          itemsGroup.add(mesh);
+          const it = Object.assign({
+            id: obj.type + '_' + (seq++) + '_' + Math.random(), x: pos.x, y, z: pos.z, cleaned: false, folded: true,
+            mesh, radarRing: addRadarRingTo(mesh, obj.type === 'surfaceDust' ? 0.05 : 0.045)
+          }, obj);
+          roomItems.push(it);
+          return it;
+        };
+
+        // 1. 쓰레기 (일반 / 분리수거 / 접어서 버리기)
         for (let i = 0; i < tCount; i++) {
-          const t = TRASH_TYPES[i % TRASH_TYPES.length];
-          const pos = randomOpenSpot();
-          const mesh = createTrashMesh(t.kind); mesh.position.set(pos.x, 0, pos.z); itemsGroup.add(mesh);
-          roomItems.push({
-            id: 'tr_' + i + '_' + Math.random(), type: 'trash', kind: t.kind, label: t.label,
-            target: 'trashbin', targetLabel: DROP_TARGETS.trashbin.label,
-            x: pos.x, y: 0, z: pos.z, cash: Math.round(t.cash * room.ticketMult),
-            hasLotto: Math.random() < lottoChance, cleaned: false, folded: true,
-            mesh, radarRing: addRadarRingTo(mesh)
-          });
+          const def = TRASH_TYPES.find(t => t.kind === weightedPick(tm.trash)) || TRASH_TYPES[0];
+          const bin = (def.bin === 'recycle' && DROP_TARGETS.recycle) ? 'recycle' : 'trashbin';
+          if (!DROP_TARGETS[bin]) continue;
+          const folded = !def.needsFold;
+          addItem({
+            type: 'trash', kind: def.kind, label: def.label, def, target: bin, targetLabel: DROP_TARGETS[bin].label,
+            needsFold: !!def.needsFold, folded, cash: Math.round(def.cash * mult), hasLotto: Math.random() < lottoChance
+          }, createMessMesh('trash', def.kind, folded), randomOpenSpot());
         }
 
+        // 2. 제자리 정리 (가구가 있는 것만 나온다)
+        const tidyAllowed = k => { const d = TIDY_TYPES.find(t => t.kind === k); return !!(d && DROP_TARGETS[d.target]); };
         for (let i = 0; i < tdCount; i++) {
-          const t = TIDY_TYPES[i % TIDY_TYPES.length];
-          const pos = randomOpenSpot();
-          const mesh = createTidyMesh(t.kind, !t.needsFold); mesh.position.set(pos.x, 0, pos.z); itemsGroup.add(mesh);
-          roomItems.push({
-            id: 'td_' + i + '_' + Math.random(), type: 'tidy', kind: t.kind, label: t.label,
-            target: t.target, targetLabel: t.targetLabel, needsFold: t.needsFold, folded: !t.needsFold,
-            x: pos.x, y: 0, z: pos.z, cash: Math.round(t.cash * room.ticketMult),
-            hasLotto: Math.random() < Math.min(0.85, lottoChance + 0.18), cleaned: false,
-            mesh, radarRing: addRadarRingTo(mesh)
-          });
+          const kind = weightedPick(tm.tidy, tidyAllowed);
+          if (!kind) break;
+          const def = TIDY_TYPES.find(t => t.kind === kind);
+          const folded = !def.needsFold;
+          addItem({
+            type: 'tidy', kind, label: def.label, def, target: def.target, targetLabel: DROP_TARGETS[def.target].label,
+            needsFold: !!def.needsFold, folded, cash: Math.round(def.cash * mult), hasLotto: Math.random() < Math.min(0.85, lottoChance + 0.18)
+          }, createMessMesh('tidy', kind, folded), randomOpenSpot());
         }
 
+        // 3. 바닥 먼지 종류 (청소기)
         for (let i = 0; i < fdCount; i++) {
-          const pos = randomOpenSpot();
-          const mesh = createFloorDustMesh(); mesh.position.set(pos.x, 0, pos.z); itemsGroup.add(mesh);
-          roomItems.push({
-            id: 'fd_' + i + '_' + Math.random(), type: 'floorDust', kind: 'dust', label: '바닥 먼지',
-            x: pos.x, y: 0, z: pos.z, cash: Math.round(550 * room.ticketMult),
-            hasLotto: Math.random() < lottoChance * 0.7, cleaned: false, scale: 1,
-            mesh, radarRing: addRadarRingTo(mesh)
-          });
+          const def = DUST_TYPES.find(t => t.kind === weightedPick(tm.dust)) || DUST_TYPES[0];
+          addItem({ type: 'floorDust', kind: def.kind, label: def.label, scale: 1, cash: Math.round(def.cash * mult), hasLotto: Math.random() < lottoChance * 0.7 },
+            createFloorDustMesh(def.color, def.kind), randomOpenSpot());
         }
 
+        // 4. 얼룩 종류 (물걸레) — 진흙은 발자국이 줄지어 찍힌다
         for (let i = 0; i < spCount; i++) {
-          const pos = randomOpenSpot();
-          const mesh = createSpillMesh(); mesh.position.set(pos.x, 0, pos.z); itemsGroup.add(mesh);
-          roomItems.push({
-            id: 'sp_' + i + '_' + Math.random(), type: 'spill', kind: 'spill', label: '커피 얼룩',
-            x: pos.x, y: 0, z: pos.z, hp: 100, cash: Math.round(1350 * room.ticketMult),
-            hasLotto: Math.random() < lottoChance * 0.65, cleaned: false,
-            mesh, radarRing: addRadarRingTo(mesh)
-          });
+          const def = SPILL_TYPES.find(t => t.kind === weightedPick(tm.spill)) || SPILL_TYPES[0];
+          if (def.trail) {
+            const start = randomOpenSpot();
+            const ang = Math.random() * Math.PI * 2;
+            const n = randInt(3, 5);
+            for (let k = 0; k < n; k++) {
+              const pos = { x: start.x + Math.cos(ang) * k * 0.55, z: start.z + Math.sin(ang) * k * 0.55 };
+              if (Math.abs(pos.x) > 4.3 || Math.abs(pos.z) > 4.3 || isInsideFurniture(pos.x, pos.z)) break;
+              const m = createFootprintMesh(def.color, k % 2 === 0);
+              m.rotation.y = -ang - Math.PI / 2; // 발끝이 걸어간 방향을 보게
+              addItem({ type: 'spill', kind: def.kind, label: def.label, hp: def.hp, maxHp: def.hp, cash: Math.round(def.cash * mult), hasLotto: Math.random() < lottoChance * 0.3 }, m, pos);
+            }
+          } else {
+            addItem({ type: 'spill', kind: def.kind, label: def.label, hp: def.hp, maxHp: def.hp, cash: Math.round(def.cash * mult), hasLotto: Math.random() < lottoChance * 0.65 },
+              createSpillMesh(def.color, def.kind), randomOpenSpot());
+          }
         }
 
-        const spots = SURFACE_DUST_SPOTS.slice(0, Math.min(room.surfaceDustCount, SURFACE_DUST_SPOTS.length));
-        spots.forEach((sp, i) => {
-          const mesh = createSurfaceDustMesh(); mesh.position.set(sp.x, sp.y, sp.z); itemsGroup.add(mesh);
-          roomItems.push({
-            id: 'sd_' + i + '_' + Math.random(), type: 'surfaceDust', kind: 'surfaceDust', label: sp.label,
-            x: sp.x, y: sp.y, z: sp.z, hp: 100, cash: Math.round(1450 * room.ticketMult),
-            hasLotto: Math.random() < lottoChance + 0.1, cleaned: false,
-            mesh, radarRing: addRadarRingTo(mesh, 0.05)
-          });
+        // 5. 가구 위 먼지 + 벽 구석 거미줄 (먼지떨이)
+        shuffleArr(layout.dustSpots.slice()).slice(0, sdCount).forEach(sp => {
+          addItem({ type: 'surfaceDust', kind: 'surfaceDust', label: sp.label, hp: 100, maxHp: 100, cash: Math.round(1450 * mult), hasLotto: Math.random() < lottoChance + 0.1 },
+            createSurfaceDustMesh(), sp, sp.y);
+        });
+        shuffleArr(layout.cobwebSpots.slice()).slice(0, webCount).forEach(sp => {
+          const m = createCobwebMesh(); m.rotation.y = sp.rot;
+          addItem({ type: 'surfaceDust', kind: 'cobweb', label: '거미줄', hp: 120, maxHp: 120, cash: Math.round(1700 * mult), hasLotto: Math.random() < lottoChance }, m, sp, sp.y);
         });
 
-        // Guarantee at least 3 hidden lotto tickets + 1 torn golden shard per room!
-        let lottoCount = roomItems.filter(it => it.hasLotto).length;
-        for (let i = 0; i < roomItems.length && lottoCount < 3; i++) {
-          if (!roomItems[i].hasLotto) { roomItems[i].hasLotto = true; lottoCount++; }
+        // 6. 쓰러진 물건 (손으로 탭해서 세우기)
+        for (let i = 0; i < knCount; i++) {
+          const def = KNOCKED_TYPES[Math.floor(Math.random() * KNOCKED_TYPES.length)];
+          addItem({ type: 'knocked', kind: def.kind, label: def.label, cash: Math.round(def.cash * mult), hasLotto: Math.random() < lottoChance * 0.8 },
+            createKnockedMesh(def.kind), randomOpenSpot());
         }
-        if (roomItems.length > 0) {
-          roomItems[Math.floor(Math.random() * roomItems.length)].hasShard = true;
+
+        // 7. 떨어진 돈 (탭하면 바로 줍기)
+        for (let i = 0; i < puCount; i++) {
+          const def = Math.random() < 0.75 ? PICKUP_TYPES[0] : PICKUP_TYPES[1];
+          addItem({ type: 'pickup', kind: def.kind, label: def.label, cash: Math.round(def.cash * mult), hasLotto: false },
+            createPickupMesh(def.kind), randomOpenSpot());
         }
+
+        // 숨은 로또는 물건 수와 상관없이 방마다 정해진 개수만 숨긴다.
+        // 기본 4~6장 + 테마(도서관·중세 성 +1, 쓰레기방 +2) + 보물찾기 직감 2레벨당 +1 + 보물사냥꾼 특전 +1
+        roomItems.forEach(it => { it.hasLotto = false; it.hasShard = false; });
+        const lottoBudget = randInt(4, 6)
+          + Math.round((theme.lottoBonus || 0) * 8)
+          + Math.floor((state.upgrades.lottoRate || 0) / 2)
+          + (state.activePerk === 'hunter' ? 1 : 0);
+        const hideSpots = shuffleArr(roomItems.filter(it => it.type !== 'pickup'));
+        hideSpots.slice(0, lottoBudget).forEach(it => { it.hasLotto = true; });
+        // 황금 조각 1개는 로또가 없는 물건에 숨긴다
+        const shardSpot = hideSpots[lottoBudget];
+        if (shardSpot) shardSpot.hasShard = true;
 
         remainingItemsCount = roomItems.length;
         syncRoboVacs();
@@ -1958,7 +2567,7 @@
         }
         const goal = getNextGoal();
         const goalPill = document.getElementById('next-goal-pill');
-        const showGoal = goal && state.stats.cleanedCount >= 2 && !draggedItem && roomItemsCount > 0;
+        const showGoal = goal && state.stats.cleanedCount >= 2 && !draggedItem && remainingItemsCount > 0;
         if (goalPill) {
           goalPill.classList.toggle('hidden', !showGoal);
           if (showGoal) {
@@ -2157,7 +2766,8 @@
       function checkDailyMission() {
         if (missionCompleted) return;
         let done = false;
-        if (currentMission.id === 'care' && plantWatered && windowCleaned) done = true;
+        const reqChores = chores.filter(c => c.required);
+        if (currentMission.id === 'care' && reqChores.length > 0 && reqChores.every(c => c.done)) done = true;
         else if (currentMission.id === 'fever' && feverTriggeredToday) done = true;
         else if (currentMission.id === 'fast' && roomCleared && dayElapsedSec <= 90) done = true;
 
@@ -2185,7 +2795,7 @@
           SoundFX.feverStart(); triggerShake(0.28);
           document.getElementById('stage-card').classList.add('fever-glow');
           document.getElementById('fever-badge').classList.remove('hidden');
-          showToast('🔥 청소 피버 타임 발동! 15초간 보상 & 로또 발견율 2배!');
+          showToast('🔥 청소 피버 타임 발동! 15초간 보상 2배 & 보너스 로또 찬스!');
           checkDailyMission();
         }
       }
@@ -2194,7 +2804,7 @@
         if (item.cleaned) return;
         item.cleaned = true;
         remainingItemsCount = Math.max(0, remainingItemsCount - 1);
-        if (!keepMeshForFly) itemsGroup.remove(item.mesh);
+        if (!keepMeshForFly) { itemsGroup.remove(item.mesh); disposeObject(item.mesh); }
 
         combo = Math.min(10, combo + 1);
         comboTimer = state.activePerk === 'artisan' ? 225 : 150;
@@ -2219,7 +2829,7 @@
         addFloatPopup3D(dropX, dropY + 0.75, dropZ, `${critTag}${comboPrefix}${customMsg} +${formatKRW(earned)}`, isCrit ? '#d97706' : color, isCrit ? 1.35 : (1 + Math.min(0.45, (combo - 1) * 0.05)));
 
         if (item.hasShard) spawnHiddenDropAt(item.x, item.z, 'shard');
-        else if (item.hasLotto || (feverFrames > 0 && Math.random() < 0.25)) spawnHiddenDropAt(item.x, item.z, 'auto');
+        else if (item.hasLotto || (feverFrames > 0 && Math.random() < 0.1)) spawnHiddenDropAt(item.x, item.z, 'auto');
 
         checkRoomCleared();
         updateAllUI();
@@ -2262,7 +2872,7 @@
       function checkRoomCleared() {
         if (roomCleared) return;
         const remaining = roomItems.filter(it => !it.cleaned).length;
-        if (remaining === 0 && bedMade && plantWatered && windowCleaned && roomItems.length > 0) {
+        if (remaining === 0 && chores.every(c => !c.required || c.done) && roomItems.length > 0) {
           roomCleared = true;
           const room = ROOMS[state.roomId];
           state.wealth += room.clearBonus; state.totalEarned += room.clearBonus;
@@ -2304,87 +2914,136 @@
         actionStatusPill.classList.remove('hidden');
       }
 
-      function foldClothesItem(item) {
-        item.folded = true; item.label = '갠 옷';
+      const HAND_TYPES = ['trash', 'tidy', 'knocked', 'pickup'];
+      const TAP_TIPS = {
+        bed: '🛏️ 클릭해서 구겨진 이불 펴기',
+        drawer: '🗄️ 클릭해서 책상 서랍 확인하기 (보너스)',
+        plant: '🪴 클릭해서 화분에 물주기'
+      };
+      const DROP_MSG = {
+        trashbin: '🗑️ 쓰레기 버림!', recycle: '♻️ 분리수거 완료!', bookshelf: '📚 책장에 꽂기 완료!',
+        wardrobe: '🚪 옷장에 정리 완료!', bed: '🛏️ 침대에 올리기 완료!', desk: '🖥️ 책상에 정리 완료!',
+        laundry: '🧺 빨래 바구니에 쏙!', kitchen: '🚰 싱크대에 넣기 완료!', toybox: '🧸 장난감 정리 완료!', chest: '💰 보물 상자에 쏙!'
+      };
+
+      function foldItem(item) {
+        item.folded = true;
+        if (item.def && item.def.foldedLabel) item.label = item.def.foldedLabel;
         itemsGroup.remove(item.mesh);
-        const newMesh = createTidyMesh('clothes', true);
+        disposeObject(item.mesh);
+        const newMesh = createMessMesh(item.type, item.kind, true);
         newMesh.position.set(item.x, 0, item.z);
         item.mesh = newMesh; item.radarRing = addRadarRingTo(newMesh);
         itemsGroup.add(newMesh);
         SoundFX.fold();
-        spawnParticles3D(item.x, 0.25, item.z, 0xa855f7, 10);
-        addFloatPopup3D(item.x, 0.65, item.z, '👕 옷 개기 완료! 옷장으로 드래그!', '#7c3aed');
+        spawnParticles3D(item.x, 0.25, item.z, item.kind === 'box' ? 0xc2935b : 0xa855f7, 10);
+        const where = (item.targetLabel || '').split(' ').slice(1).join(' ');
+        addFloatPopup3D(item.x, 0.65, item.z, `${(item.def && item.def.foldMsg) || '접기 완료!'} ${where}`, '#7c3aed');
       }
 
-      function tryMakeBed() {
-        if (bedMade) return false;
-        bedMade = true; state.lastBedDay = state.day;
-        if (bedBlanketMesh) { bedBlanketMesh.position.set(0, 0.62, 0.44); bedBlanketMesh.rotation.set(0, 0, 0); }
-        if (bedMessyRing) bedMessyRing.visible = false;
-        const room = ROOMS[state.roomId];
-        const bonus = Math.round(3000 * room.ticketMult * (feverFrames > 0 ? 2 : 1));
-        state.wealth += bonus; state.totalEarned += bonus;
-        addFever(20); SoundFX.placeTidy();
-        spawnParticles3D(-3.2, 0.9, -2.7, 0x6366f1, 14);
-        addFloatPopup3D(-3.2, 1.3, -2.7, `🛏️ 이불 정리 완료! +${formatKRW(bonus)}`, '#4f46e5');
-        if (Math.random() < 0.65) spawnHiddenDropAt(-1.6, -2.2, 'auto');
-        checkRoomCleared(); updateAllUI(); saveState();
-        return true;
-      }
-
-      function tryCheckDeskDrawer() {
-        if (drawerChecked) return false;
-        drawerChecked = true; state.lastDrawerDay = state.day;
-        if (deskDrawerMesh) deskDrawerMesh.position.z = 0.88;
-        if (deskDrawerRing) deskDrawerRing.visible = false;
-        SoundFX.drawerSlide();
-        const room = ROOMS[state.roomId];
-        const bonus = Math.round(4500 * room.ticketMult);
-        state.wealth += bonus; state.totalEarned += bonus;
-        spawnParticles3D(3.85, 0.9, -2.7, 0xfbbf24, 14);
-        addFloatPopup3D(3.85, 1.35, -2.7, `🗄️ 서랍 비상금 +${formatKRW(bonus)}!`, '#d97706');
-        spawnHiddenDropAt(3.6, -2.2, 'auto');
-        updateAllUI(); saveState();
-        return true;
-      }
-
-      function tryWaterPlant() {
-        if (plantWatered) return false;
-        plantWatered = true; state.lastPlantDay = state.day;
-        if (plantThirstyRing) plantThirstyRing.visible = false;
-        if (plantLeavesGroup) {
-          plantLeavesGroup.scale.set(1.12, 1.12, 1.12);
-          plantLeavesGroup.children.forEach(c => { if (c.material) c.material.color.setHex(0x16a34a); });
+      // ---------- 집안일(chores) ----------
+      function setupChores() {
+        chores = [];
+        const f = layout.furn;
+        const roll = p => Math.random() < p;
+        const want = { bed: !!f.bed && roll(0.75), plant: !!f.plant && roll(0.65), window: !!windowSmudgeMesh && roll(0.7) };
+        let reqCount = Object.values(want).filter(Boolean).length + (mirrorSmudgeMesh ? 1 : 0) + (scribbleMesh ? 1 : 0);
+        for (const k of shuffleArr(['bed', 'plant', 'window'])) {
+          if (reqCount >= 2) break;
+          const avail = k === 'window' ? !!windowSmudgeMesh : !!f[k];
+          if (!want[k] && avail) { want[k] = true; reqCount++; }
         }
+        if (f.bed) chores.push({ id: 'bed', kind: 'tap', label: '이불 정리', icon: '🛏️', required: want.bed, done: !want.bed || state.lastBedDay === state.day, pt: furnWorld('bed', [0, 0.85, 0.35]), radius: 1.25 });
+        if (f.desk) chores.push({ id: 'drawer', kind: 'tap', label: '서랍 비상금 찾기', icon: '🗄️', required: false, done: state.lastDrawerDay === state.day, pt: furnWorld('desk', [0.82, 0.84, 0.62]), radius: 0.95 });
+        if (f.plant) chores.push({ id: 'plant', kind: 'tap', label: '화분 물주기', icon: '🪴', required: want.plant, done: !want.plant || state.lastPlantDay === state.day, pt: furnWorld('plant', [0, 0.9, 0]), radius: 1.05 });
+        const wipe = (id, label, icon, mesh, hp, baseOpacity, required) => chores.push({
+          id, kind: 'wipe', label, icon, required, done: !required, hp, maxHp: hp, mesh, baseOpacity, pt: mesh.getWorldPosition(new THREE.Vector3())
+        });
+        if (windowSmudgeMesh) wipe('window', '창문 닦기', '🪟', windowSmudgeMesh, 100, 0.58, want.window);
+        if (mirrorSmudgeMesh) wipe('mirror', '거울 닦기', '🪞', mirrorSmudgeMesh, 100, 0.62, true);
+        if (scribbleMesh) wipe('scribble', '벽 낙서 지우기', '🖍️', scribbleMesh, 150, 1, true);
+        chores.forEach(applyChoreVisual);
+      }
+
+      function applyChoreVisual(ch) {
+        if (ch.id === 'bed' && bedBlanketMesh) {
+          if (ch.done) { bedBlanketMesh.position.set(0, 0.62, 0.44); bedBlanketMesh.rotation.set(0, 0, 0); }
+          else { bedBlanketMesh.position.set(0.14, 0.65, 0.44); bedBlanketMesh.rotation.set(0.06, 0.18, -0.05); }
+          if (bedMessyRing) bedMessyRing.visible = !ch.done;
+        } else if (ch.id === 'drawer') {
+          if (deskDrawerMesh) deskDrawerMesh.position.z = ch.done ? 0.88 : 0.56;
+          if (deskDrawerRing) deskDrawerRing.visible = !ch.done;
+        } else if (ch.id === 'plant') {
+          if (plantThirstyRing) plantThirstyRing.visible = !ch.done;
+          if (plantLeavesGroup) {
+            plantLeavesGroup.scale.set(ch.done ? 1.12 : 1, ch.done ? 1.12 : 0.9, ch.done ? 1.12 : 1);
+            plantLeavesGroup.children.forEach(c => { if (c.material) c.material.color.setHex(ch.done ? 0x16a34a : 0x65a30d); });
+          }
+        } else if (ch.kind === 'wipe' && ch.mesh) {
+          ch.mesh.visible = !ch.done;
+          ch.mesh.material.opacity = ch.baseOpacity * Math.max(0, ch.hp / ch.maxHp);
+        }
+      }
+
+      function doTapChore(ch) {
+        if (!ch || ch.done) return false;
+        ch.done = true;
         const room = ROOMS[state.roomId];
-        const bonus = Math.round(2500 * room.ticketMult);
+        const fever = feverFrames > 0 ? 2 : 1;
+        const p = ch.pt;
+        let bonus = 0;
+        if (ch.id === 'bed') {
+          state.lastBedDay = state.day;
+          bonus = Math.round(3000 * room.ticketMult * fever);
+          addFever(20); SoundFX.placeTidy();
+          spawnParticles3D(p.x, p.y, p.z, 0x6366f1, 14);
+          addFloatPopup3D(p.x, p.y + 0.45, p.z, `🛏️ 이불 정리 완료! +${formatKRW(bonus)}`, '#4f46e5');
+          if (Math.random() < 0.35) spawnHiddenDropAt(p.x * 0.55, p.z * 0.55, 'auto');
+        } else if (ch.id === 'drawer') {
+          state.lastDrawerDay = state.day;
+          bonus = Math.round(4500 * room.ticketMult);
+          SoundFX.drawerSlide();
+          spawnParticles3D(p.x, p.y, p.z, 0xfbbf24, 14);
+          addFloatPopup3D(p.x, p.y + 0.5, p.z, `🗄️ 서랍 비상금 +${formatKRW(bonus)}!`, '#d97706');
+          spawnHiddenDropAt(p.x * 0.6, p.z * 0.6, 'auto');
+        } else if (ch.id === 'plant') {
+          state.lastPlantDay = state.day;
+          bonus = Math.round(2500 * room.ticketMult);
+          addFever(15); SoundFX.waterSplash();
+          spawnParticles3D(p.x, p.y + 0.3, p.z, 0x38bdf8, 16);
+          addFloatPopup3D(p.x, p.y + 0.7, p.z, `🪴 화분 물주기 완료! +${formatKRW(bonus)}`, '#0284c7');
+          if (Math.random() < 0.45) spawnHiddenDropAt(p.x * 0.6, p.z * 0.6, 'shard');
+        }
         state.wealth += bonus; state.totalEarned += bonus;
-        addFever(15); SoundFX.waterSplash();
-        spawnParticles3D(4.05, 1.2, 3.7, 0x38bdf8, 16);
-        addFloatPopup3D(4.05, 1.6, 3.7, `🪴 화분 물주기 완료! +${formatKRW(bonus)}`, '#0284c7');
-        if (Math.random() < 0.45) spawnHiddenDropAt(2.8, 3.2, 'shard');
+        applyChoreVisual(ch);
         checkDailyMission(); checkRoomCleared(); updateAllUI(); saveState();
         return true;
       }
 
-      function tryWipeWindow(clientX, clientY) {
-        if (windowCleaned || !windowSmudgeMesh) return false;
+      // 창문·거울·벽 낙서 문질러 닦기
+      function tryWipeAt(clientX, clientY) {
+        const targets = chores.filter(c => c.kind === 'wipe' && !c.done && c.mesh);
+        if (!targets.length) return false;
         updateMouseNDC(clientX, clientY);
-        const hits = raycaster.intersectObject(windowSmudgeMesh);
-        if (hits.length > 0) {
-          windowHp -= (26 + (state.upgrades.broomSize || 0) * 8);
+        for (const ch of targets) {
+          if (raycaster.intersectObject(ch.mesh).length === 0) continue;
+          ch.hp -= (26 + (state.upgrades.broomSize || 0) * 8);
           SoundFX.mopRub();
-          spawnParticles3D(2.95, 2.2, -4.8, 0xbae6fd, 6);
-          windowSmudgeMesh.material.opacity = Math.max(0, (windowHp / 100) * 0.58);
-          if (windowHp > 0) addFloatPopup3D(2.95, 2.35, -4.6, `🪟 ${100 - Math.max(0, Math.round(windowHp))}%`, '#38bdf8');
-          if (windowHp <= 0) {
-            windowCleaned = true;
-            windowSmudgeMesh.visible = false;
+          const p = ch.pt;
+          spawnParticles3D(p.x, p.y, p.z, ch.id === 'scribble' ? 0xc084fc : 0xbae6fd, 6);
+          if (ch.hp > 0) {
+            applyChoreVisual(ch);
+            addFloatPopup3D(p.x, p.y + 0.2, p.z, `${ch.icon} ${Math.round((1 - ch.hp / ch.maxHp) * 100)}%`, '#38bdf8');
+          } else {
+            ch.done = true; applyChoreVisual(ch);
             const room = ROOMS[state.roomId];
-            const bonus = Math.round(3500 * room.ticketMult * (feverFrames > 0 ? 2 : 1));
+            const base = ch.id === 'scribble' ? 4200 : (ch.id === 'mirror' ? 3200 : 3500);
+            const bonus = Math.round(base * room.ticketMult * (feverFrames > 0 ? 2 : 1));
             state.wealth += bonus; state.totalEarned += bonus;
             addFever(18); SoundFX.placeTidy();
-            addFloatPopup3D(2.95, 2.5, -4.6, `🪟 창문 반짝반짝! +${formatKRW(bonus)}`, '#0284c7');
+            const msg = ch.id === 'window' ? '🪟 창문 반짝반짝!' : (ch.id === 'mirror' ? '🪞 거울 반짝반짝!' : '🖍️ 낙서 싹 지움!');
+            addFloatPopup3D(p.x, p.y + 0.35, p.z, `${msg} +${formatKRW(bonus)}`, '#0284c7');
+            if (Math.random() < 0.2) spawnHiddenDropAt(p.x * 0.55, p.z * 0.55, 'auto');
             checkDailyMission(); checkRoomCleared(); updateAllUI(); saveState();
           }
           return true;
@@ -2401,29 +3060,110 @@
             it.hp -= power;
             SoundFX.dustSwish();
             spawnParticles3D(it.x, it.y + 0.1, it.z, 0xe5e7eb, 5);
-            it.mesh.scale.setScalar(Math.max(0.25, it.hp / 100));
-            if (it.hp > 0) addFloatPopup3D(it.x, it.y + 0.45, it.z, `🪶 ${100 - Math.max(0, Math.round(it.hp))}%`, '#ec4899');
-            if (it.hp <= 0) completeItem(it, it.x, it.y, it.z, '🪶 먼지 털기 완료!', '#db2777');
+            it.mesh.scale.setScalar(Math.max(0.25, it.hp / (it.maxHp || 100)));
+            const pct = Math.round((1 - Math.max(0, it.hp) / (it.maxHp || 100)) * 100);
+            if (it.hp > 0) addFloatPopup3D(it.x, it.y + 0.45, it.z, `🪶 ${pct}%`, '#ec4899');
+            if (it.hp <= 0) completeItem(it, it.x, it.y, it.z, it.kind === 'cobweb' ? '🕸️ 거미줄 걷기 완료!' : '🪶 먼지 털기 완료!', '#db2777');
             return;
           }
         }
       }
 
       function tryMopSpillAt(floorPt, clientX, clientY) {
-        if (tryWipeWindow(clientX, clientY)) return;
+        if (tryWipeAt(clientX, clientY)) return;
         if (!floorPt) return;
         const power = 26 + (state.upgrades.broomSize || 0) * 8;
         for (const it of roomItems) {
           if (it.cleaned || it.type !== 'spill') continue;
-          if (Math.hypot(floorPt.x - it.x, floorPt.z - it.z) < 0.95) {
+          const reach = it.kind === 'mud' ? 0.5 : 0.95;
+          if (Math.hypot(floorPt.x - it.x, floorPt.z - it.z) < reach) {
             it.hp -= power;
             SoundFX.mopRub();
             spawnParticles3D(it.x, 0.12, it.z, 0x38bdf8, 5);
-            it.mesh.scale.setScalar(Math.max(0.2, it.hp / 100));
-            if (it.hp > 0) addFloatPopup3D(it.x, 0.38, it.z, `🧽 ${100 - Math.max(0, Math.round(it.hp))}%`, '#0ea5e9');
-            if (it.hp <= 0) completeItem(it, it.x, 0.15, it.z, '🧽 얼룩 닦기 완료!', '#0284c7');
+            it.mesh.scale.setScalar(Math.max(0.2, it.hp / (it.maxHp || 100)));
+            const pct = Math.round((1 - Math.max(0, it.hp) / (it.maxHp || 100)) * 100);
+            if (it.hp > 0) addFloatPopup3D(it.x, 0.38, it.z, `🧽 ${pct}%`, '#0ea5e9');
+            if (it.hp <= 0) completeItem(it, it.x, 0.15, it.z, `🧽 ${it.label} 닦기 완료!`, '#0284c7');
             return;
           }
+        }
+      }
+
+      // ---------- 쓰레기통 용량 ----------
+      function binWorldPt(id) {
+        const f = layout.furn[id];
+        return furnWorld(id, (f && f.spec.binPt) || [0, 0.6, 0]);
+      }
+      function findFullBinUnderRay() {
+        for (const id of Object.keys(binState)) {
+          const b = binState[id];
+          if (b.fill < b.cap) continue;
+          if (raycaster.ray.distanceToPoint(binWorldPt(id)) < 0.9) return id;
+        }
+        return null;
+      }
+      function updateBinVisuals() {
+        for (const id of ['trashbin', 'recycle']) {
+          const f = layout.furn[id];
+          if (!f || !f.spec.refs) continue;
+          const b = binState[id] || { fill: 0, cap: 1 };
+          f.spec.refs.mound.visible = b.fill >= Math.ceil(b.cap / 2);
+          f.spec.refs.mound.scale.setScalar(0.5 + 0.5 * Math.min(1, b.fill / b.cap));
+          f.spec.refs.ring.visible = b.fill >= b.cap;
+        }
+      }
+      function emptyBin(id) {
+        const b = binState[id];
+        if (!b || b.fill <= 0) return;
+        const p = binWorldPt(id);
+        const room = ROOMS[state.roomId];
+        const bonus = Math.round(b.fill * 350 * room.ticketMult);
+        b.fill = 0;
+        state.wealth += bonus; state.totalEarned += bonus;
+        if (id === 'trashbin') binBounceTimer = 24;
+        SoundFX.trashDrop(3); addFever(10);
+        spawnParticles3D(p.x, p.y + 0.4, p.z, 0x64748b, 14);
+        addFloatPopup3D(p.x, p.y + 0.9, p.z, `${id === 'recycle' ? '♻️ 분리수거함' : '🗑️ 쓰레기통'} 비움! +${formatKRW(bonus)}`, '#475569');
+        updateBinVisuals(); updateAllUI(); saveState();
+      }
+
+      // ---------- 쓰러진 물건 세우기 ----------
+      function standUpItem(it) {
+        const body = it.mesh.userData.body;
+        if (it.mesh.userData.ring) it.mesh.userData.ring.visible = false;
+        if (it.radarRing) it.radarRing.visible = false;
+        if (body) tweens.push({ body, from: { rz: body.rotation.z, x: body.position.x, y: body.position.y }, t: 0 });
+        SoundFX.placeTidy(combo + 1);
+        completeItem(it, it.x, 0.3, it.z, `🪑 ${it.label.replace(/^(쓰러진|넘어진) /, '')} 바로 세움!`, '#4f46e5', false, true);
+      }
+
+      // 정리한 물건이 실제 가구 위에 쌓여 보이게
+      function addOrganizedItemVisually(item) {
+        const f = layout.furn[item.target];
+        if (!f) return;
+        const put = (mesh, p, yaw = 0) => {
+          mesh.position.copy(f.inner.localToWorld(new THREE.Vector3(p[0], p[1], p[2])));
+          mesh.rotation.y = f.outer.rotation.y + yaw;
+          organizedGroup.add(mesh);
+        };
+        const n = layout.stack[item.target] = (layout.stack[item.target] || 0) + 1;
+        if (item.target === 'bookshelf') {
+          const i = bookshelfSlotIdx++ % 8;
+          const shelfY = i < 4 ? 0.76 : 1.36;
+          const colors = item.kind === 'scroll' ? [0xd6c7a1, 0xc8b68a] : [0x2563eb, 0xe11d48, 0x10b981, 0xf59e0b];
+          put(makeBox(0.12, 0.42, 0.38, colors[i % colors.length]), [0.05 + (i % 4) * 0.17, shelfY + 0.21, 0.04]);
+        } else if (item.target === 'bed') {
+          put(makeBox(0.48, 0.2, 0.48, 0xf59e0b, { roughness: 0.9 }), [(Math.random() - 0.5) * 0.8, 0.88, 0.55], 0.2);
+        } else if (item.target === 'desk') {
+          put(makeBox(0.5, 0.04, 0.36, 0x94a3b8, { metalness: 0.5 }), [0.8, 1.13 + (n - 1) * 0.045, 0]);
+        } else if (item.target === 'wardrobe') {
+          wardrobeOpenTimer = 35;
+        } else if (item.target === 'laundry') {
+          const cols = [0xf472b6, 0x60a5fa, 0x14b8a6, 0xf8fafc, 0xfacc15];
+          put(makeBox(0.32, 0.08, 0.3, cols[n % cols.length], { roughness: 1 }), [(Math.random() - 0.5) * 0.25, 0.5 + Math.min(n, 5) * 0.05, (Math.random() - 0.5) * 0.25], Math.random() * 3);
+        } else if (item.target === 'kitchen') {
+          const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 0.03, 18), new THREE.MeshStandardMaterial({ color: item.kind === 'mug' ? 0xfef3c7 : 0xffffff, roughness: 0.35 }));
+          put(plate, [0.55, 1.02 + (n - 1) * 0.035, 0]);
         }
       }
 
@@ -2489,35 +3229,47 @@
         }
 
         // Smart Auto-Tool Detection (Eliminates silent failures when tapping with wrong tool!)
-        if (state.tool !== 'radar' && floorPt) {
-          // 1. Check window smudge tap -> auto switch to mop
-          if (!windowCleaned && windowSmudgeMesh && raycaster.intersectObject(windowSmudgeMesh).length > 0) {
-            if (state.tool !== 'mop' && state.tool !== 'duster') { selectTool('mop'); showToast('🧽 물걸레로 자동 전환! 문질러 창문을 닦으세요.'); }
-            tryWipeWindow(e.clientX, e.clientY);
+        // 벽 높은 곳(거미줄·가구 위 먼지)은 바닥과 안 만날 수 있으니 바닥 좌표 없이도 검사한다
+        if (state.tool !== 'radar') {
+          // 1. 창문·거울·벽 낙서 → 물걸레
+          const wipeHit = chores.find(c => c.kind === 'wipe' && !c.done && c.mesh && raycaster.intersectObject(c.mesh).length > 0);
+          if (wipeHit) {
+            if (state.tool !== 'mop' && state.tool !== 'duster') { selectTool('mop'); showToast(`🧽 물걸레로 자동 전환! 문질러서 ${wipeHit.label}!`); }
+            tryWipeAt(e.clientX, e.clientY);
             return;
           }
-          // 2. Check furniture surface dust -> auto switch to duster
+          // 2. 가구 위 먼지·거미줄 → 먼지떨이
           const hitSurfDust = roomItems.find(it => !it.cleaned && it.type === 'surfaceDust' && raycaster.ray.distanceToPoint(new THREE.Vector3(it.x, it.y, it.z)) < 0.85);
           if (hitSurfDust) {
             if (state.tool !== 'duster') { selectTool('duster'); showToast('🪶 먼지떨이로 자동 전환! 문질러 털어내세요.'); }
             tryDustSurfaceAt(e.clientX, e.clientY);
             return;
           }
-          // 3. Check interactive furniture (bed, drawer, plant) -> always works on tap
-          if (!bedMade && raycaster.ray.distanceToPoint(new THREE.Vector3(-3.2, 0.85, -2.75)) < 1.25) { tryMakeBed(); return; }
-          if (!drawerChecked && raycaster.ray.distanceToPoint(new THREE.Vector3(3.87, 0.84, -2.95)) < 0.95) { tryCheckDeskDrawer(); return; }
-          if (!plantWatered && raycaster.ray.distanceToPoint(new THREE.Vector3(4.05, 0.9, 3.7)) < 1.05) { tryWaterPlant(); return; }
+          // 3. 꽉 찬 쓰레기통 → 눌러서 비우기
+          const fullBin = findFullBinUnderRay();
+          if (fullBin) { emptyBin(fullBin); return; }
+          // 4. 이불·서랍·화분
+          const tapHit = chores.find(c => c.kind === 'tap' && !c.done && raycaster.ray.distanceToPoint(c.pt) < c.radius);
+          if (tapHit) { doTapChore(tapHit); return; }
+        }
 
-          // 4. Check trash / tidy items -> auto switch to hand if tapped directly
+        if (state.tool !== 'radar' && floorPt) {
+          // 5. 손 정리: 쓰레기·물건 드래그, 쓰러진 물건 세우기, 돈 줍기
           let closestHand = null, minD = 0.9;
           for (const it of roomItems) {
-            if (it.cleaned || (it.type !== 'trash' && it.type !== 'tidy')) continue;
+            if (it.cleaned || !HAND_TYPES.includes(it.type)) continue;
             const d = Math.hypot(floorPt.x - it.x, floorPt.z - it.z);
             if (d < minD) { minD = d; closestHand = it; }
           }
           if (closestHand && (state.tool === 'hand' || minD < 0.62)) {
-            if (state.tool !== 'hand') { selectTool('hand'); showToast('✋ 손 정리로 자동 전환! 제자리로 드래그하세요.'); }
-            if (closestHand.type === 'tidy' && closestHand.needsFold && !closestHand.folded) { foldClothesItem(closestHand); return; }
+            if (state.tool !== 'hand') { selectTool('hand'); showToast('✋ 손 정리로 자동 전환!'); }
+            if (closestHand.type === 'knocked') { standUpItem(closestHand); return; }
+            if (closestHand.type === 'pickup') {
+              SoundFX.coin();
+              completeItem(closestHand, closestHand.x, 0.1, closestHand.z, `💰 ${closestHand.label} 줍기!`, '#ca8a04');
+              return;
+            }
+            if (closestHand.needsFold && !closestHand.folded) { foldItem(closestHand); return; }
             draggedItem = closestHand;
             dragStartPos = { x: closestHand.x, z: closestHand.z };
             dragMovedDist = 0;
@@ -2528,15 +3280,15 @@
             return;
           }
 
-          // 5. If tapping spill with hand -> auto switch to mop
+          // 6. 얼룩 → 물걸레
           const nearSpill = roomItems.find(it => !it.cleaned && it.type === 'spill' && Math.hypot(floorPt.x - it.x, floorPt.z - it.z) < 0.85);
           if (nearSpill) {
-            if (state.tool !== 'mop') { selectTool('mop'); showToast('🧽 물걸레로 자동 전환! 문질러 얼룩을 닦으세요.'); }
+            if (state.tool !== 'mop') { selectTool('mop'); showToast(`🧽 물걸레로 자동 전환! 문질러서 ${nearSpill.label}을(를) 닦으세요.`); }
             tryMopSpillAt(floorPt, e.clientX, e.clientY);
             return;
           }
 
-          // 6. If tapping floor dust with hand -> auto switch to vacuum
+          // 7. 바닥 먼지 → 청소기
           const nearDust = roomItems.find(it => !it.cleaned && it.type === 'floorDust' && Math.hypot(floorPt.x - it.x, floorPt.z - it.z) < 0.85);
           if (nearDust && state.tool !== 'vacuum') {
             selectTool('vacuum');
@@ -2547,7 +3299,7 @@
         }
 
         if (state.tool === 'duster') {
-          if (!tryWipeWindow(e.clientX, e.clientY)) tryDustSurfaceAt(e.clientX, e.clientY);
+          if (!tryWipeAt(e.clientX, e.clientY)) tryDustSurfaceAt(e.clientX, e.clientY);
         } else if (state.tool === 'mop') {
           tryMopSpillAt(floorPt, e.clientX, e.clientY);
         } else if (state.tool === 'vacuum') {
@@ -2593,7 +3345,7 @@
         }
 
         if (state.tool === 'duster' && pointerDown && moveDist > 5) {
-          if (!tryWipeWindow(e.clientX, e.clientY)) tryDustSurfaceAt(e.clientX, e.clientY);
+          if (!tryWipeAt(e.clientX, e.clientY)) tryDustSurfaceAt(e.clientX, e.clientY);
         }
         if (state.tool === 'mop' && pointerDown && moveDist > 5) tryMopSpillAt(floorPt, e.clientX, e.clientY);
 
@@ -2627,43 +3379,21 @@
       });
 
       function updateHoverTooltip(cx, cy, floorPt) {
-        if (draggedItem || pointerDown || !floorPt) {
+        if (draggedItem || pointerDown) {
           hoverTooltip.classList.add('hidden');
           return;
         }
         let tip = '';
-        // 1. Dropped Lotto / Shards
-        if (goldenDrone) {
-          goldenDrone.x += goldenDrone.vx; goldenDrone.z += goldenDrone.vz;
-          if (goldenDrone.x < -4.1 || goldenDrone.x > 4.1) goldenDrone.vx *= -1;
-          if (goldenDrone.z < -3.9 || goldenDrone.z > 4.1) goldenDrone.vz *= -1;
-          goldenDrone.mesh.position.set(goldenDrone.x, 0.85 + Math.sin(t * 4) * 0.16, goldenDrone.z);
-          goldenDrone.mesh.rotation.y = t * 3.2;
-          goldenDrone.life--;
-          if (goldenDrone.life <= 0) {
-            ticketsGroup.remove(goldenDrone.mesh);
-            goldenDrone = null;
-          }
-        } else if (!roomCleared && remainingItemsCount > 0) {
-          droneSpawnCooldown--;
-          if (droneSpawnCooldown <= 0) {
-            const cdBase = state.activePerk === 'hunter' ? 1350 : 2700;
-            droneSpawnCooldown = cdBase + Math.floor(Math.random() * 900); // every 45~65s
-            spawnGoldenDrone();
-          }
-        }
-
-        for (const tk of droppedTickets) {
+        for (const tk of (floorPt ? droppedTickets : [])) {
           if (Math.hypot(floorPt.x - tk.x, floorPt.z - tk.z) <= 0.9) {
             tip = tk.kind === 'shard' ? '🧩 클릭해서 황금 조각 줍기!' : '🎫 클릭해서 로또 줍기!';
             break;
           }
         }
-        // 2. Window smudge
-        if (!tip && !windowCleaned && windowSmudgeMesh && raycaster.intersectObject(windowSmudgeMesh).length > 0) {
-          tip = state.tool === 'mop' || state.tool === 'duster' ? '🪟 드래그해서 창문 닦기' : '🪟 물걸레(4)로 창문 유리 닦기';
+        if (!tip) {
+          const w = chores.find(c => c.kind === 'wipe' && !c.done && c.mesh && raycaster.intersectObject(c.mesh).length > 0);
+          if (w) tip = (state.tool === 'mop' || state.tool === 'duster') ? `${w.icon} 드래그해서 ${w.label}` : `${w.icon} 물걸레(4)로 ${w.label}`;
         }
-        // 3. Surface dust on furniture
         if (!tip) {
           for (const it of roomItems) {
             if (it.cleaned || it.type !== 'surfaceDust') continue;
@@ -2673,27 +3403,26 @@
             }
           }
         }
-        // 4. Interactive furniture (Bed, Drawer, Plant)
-        if (!tip && !bedMade && raycaster.ray.distanceToPoint(new THREE.Vector3(-3.2, 0.85, -2.75)) < 1.15) {
-          tip = state.tool === 'hand' ? '🛏️ 클릭해서 구겨진 이불 펴기' : '🛏️ 손(1)으로 침대 이불 펴기';
-        }
-        if (!tip && !drawerChecked && raycaster.ray.distanceToPoint(new THREE.Vector3(3.87, 0.84, -2.95)) < 0.85) {
-          tip = state.tool === 'hand' ? '🗄️ 클릭해서 책상 서랍 확인하기' : '🗄️ 손(1)으로 서랍 열어보기';
-        }
-        if (!tip && !plantWatered && raycaster.ray.distanceToPoint(new THREE.Vector3(4.05, 0.9, 3.7)) < 0.95) {
-          tip = '🪴 클릭해서 화분에 물주기';
-        }
-        // 5. Floor items (Trash, Tidy, Floor Dust, Spills)
         if (!tip) {
+          const fb = findFullBinUnderRay();
+          if (fb) tip = fb === 'recycle' ? '♻️ 꽉 찼어요! 클릭해서 분리수거함 비우기' : '🗑️ 꽉 찼어요! 클릭해서 봉투 묶어 비우기';
+        }
+        if (!tip) {
+          const tc = chores.find(c => c.kind === 'tap' && !c.done && raycaster.ray.distanceToPoint(c.pt) < c.radius - 0.1);
+          if (tc) tip = TAP_TIPS[tc.id] || '';
+        }
+        if (!tip && floorPt) {
           for (const it of roomItems) {
             if (it.cleaned || it.type === 'surfaceDust') continue;
             if (Math.hypot(floorPt.x - it.x, floorPt.z - it.z) < 0.78) {
-              if (it.type === 'trash') tip = state.tool === 'hand' ? `🗑️ ${it.label} → 쓰레기통으로 드래그` : `✋ 손(1)으로 집어 쓰레기통에 버리기`;
-              else if (it.type === 'tidy') {
-                if (it.needsFold && !it.folded) tip = state.tool === 'hand' ? '👕 클릭해서 옷 먼저 개기' : '✋ 손(1)으로 클릭해 옷 개기';
-                else tip = state.tool === 'hand' ? `${it.targetLabel} (드래그)` : `✋ 손(1)으로 ${it.targetLabel}`;
-              } else if (it.type === 'floorDust') tip = state.tool === 'vacuum' ? '🔌 누른 채 밀어서 흡입!' : '🔌 청소기(3)로 바닥 먼지 흡입';
-              else if (it.type === 'spill') tip = state.tool === 'mop' ? '🧽 문질러서 얼룩 닦기!' : '🧽 물걸레(4)로 커피 얼룩 닦기';
+              const handTool = state.tool === 'hand';
+              if (it.type === 'trash' || it.type === 'tidy') {
+                if (it.needsFold && !it.folded) tip = handTool ? it.def.foldTip : `✋ 손(1)으로 ${it.def.foldTip.replace('클릭해서 ', '')}`;
+                else tip = handTool ? `${it.label} → ${it.targetLabel} (드래그)` : `✋ 손(1)으로 ${it.targetLabel}`;
+              } else if (it.type === 'knocked') tip = handTool ? `🪑 클릭해서 ${it.label} 세우기` : `✋ 손(1)으로 ${it.label} 세우기`;
+              else if (it.type === 'pickup') tip = `💰 클릭해서 ${it.label} 줍기`;
+              else if (it.type === 'floorDust') tip = state.tool === 'vacuum' ? `🔌 누른 채 밀어서 ${it.label} 흡입!` : `🔌 청소기(3)로 ${it.label} 흡입`;
+              else if (it.type === 'spill') tip = state.tool === 'mop' ? `🧽 문질러서 ${it.label} 닦기!` : `🧽 물걸레(4)로 ${it.label} 닦기`;
               break;
             }
           }
@@ -2713,53 +3442,65 @@
         pointerDown = false; rightDragging = false;
         targetLidAngle = 0; targetWardAngle = 0;
         SoundFX.setVacuumHum(false);
+        if (!draggedItem) return;
 
-        if (draggedItem) {
-          const item = draggedItem;
-          draggedItem = null;
-          targetBeacon.visible = false;
-          targetGuideLabel.classList.add('hidden');
-          showActionStatus('');
+        const item = draggedItem;
+        draggedItem = null;
+        targetBeacon.visible = false;
+        targetGuideLabel.classList.add('hidden');
+        showActionStatus('');
 
-          const tgt = DROP_TARGETS[item.target];
-          const dist = Math.hypot(item.mesh.position.x - tgt.x, item.mesh.position.z - tgt.z);
+        const tgt = DROP_TARGETS[item.target];
+        const dist = Math.hypot(item.mesh.position.x - tgt.x, item.mesh.position.z - tgt.z);
+        const bin = item.type === 'trash' ? binState[item.target] : null;
+        const binFull = !!bin && bin.fill >= bin.cap;
 
-          if (dist <= tgt.radius) {
-            // Smooth 3D Fly-In Animation into the exact target!
-            const startVec = item.mesh.position.clone();
-            const endVec = new THREE.Vector3(tgt.x, tgt.y, tgt.z);
-            const isTrash = item.type === 'trash';
-            if (isTrash) { binBounceTimer = 24; SoundFX.trashDrop(combo + 1); }
-            else SoundFX.placeTidy(combo + 1);
-
-            const msgs = { books: '📚 책장에 꽂기 완료!', clothes: '🚪 옷장에 정리 완료!', cushion: '🛏️ 침대에 올리기 완료!', laptop: '🖥️ 책상에 정리 완료!' };
-            completeItem(item, tgt.x, tgt.y, tgt.z, isTrash ? '🗑️ 쓰레기 버림!' : (msgs[item.kind] || '정리 완료!'), isTrash ? '#059669' : '#4f46e5', false, true);
-
-            flyingItems.push({
-              mesh: item.mesh, start: startVec, end: endVec, t: 0,
-              onDone: () => {
-                itemsGroup.remove(item.mesh);
-                if (!isTrash) addOrganizedItemVisually(item);
-              }
-            });
-          } else {
-            // Elastic fly-back animation + subtle error feedback + always guide on tap!
-            const startBack = item.mesh.position.clone();
-            const endBack = new THREE.Vector3(dragStartPos.x, 0, dragStartPos.z);
-            SoundFX.error();
-            addFloatPopup3D(dragStartPos.x, 0.75, dragStartPos.z, `${tgt.label}로 드래그하세요!`, '#d97706');
-            // Briefly flash destination beacon so user sees where to drag
-            targetBeacon.position.set(tgt.x, 0.9, tgt.z);
-            targetBeacon.visible = true;
-            setTimeout(() => { if (!draggedItem) targetBeacon.visible = false; }, 750);
-            flyingItems.push({
-              mesh: item.mesh, start: startBack, end: endBack, t: 0, keepScale: true,
-              onDone: () => {
-                item.mesh.position.set(dragStartPos.x, 0, dragStartPos.z);
-                if (item.mesh.userData.ring) item.mesh.userData.ring.visible = true;
-              }
-            });
+        if (dist <= tgt.radius && !binFull) {
+          const startVec = item.mesh.position.clone();
+          const endVec = new THREE.Vector3(tgt.x, tgt.y, tgt.z);
+          const isTrash = item.type === 'trash';
+          if (item.target === 'trashbin') binBounceTimer = 24;
+          if (isTrash) SoundFX.trashDrop(combo + 1); else SoundFX.placeTidy(combo + 1);
+          if (bin) {
+            bin.fill += 1;
+            updateBinVisuals();
+            if (bin.fill >= bin.cap) {
+              addFloatPopup3D(tgt.x, tgt.y + 1.1, tgt.z, item.target === 'recycle' ? '♻️ 분리수거함 꽉 참! 눌러서 비우기' : '🗑️ 쓰레기통 꽉 참! 눌러서 비우기', '#dc2626');
+              showToast(item.target === 'recycle' ? '♻️ 분리수거함이 꽉 찼어요! 통을 눌러 비워 주세요.' : '🗑️ 쓰레기통이 꽉 찼어요! 통을 눌러 봉투를 묶어 주세요.');
+            }
           }
+          completeItem(item, tgt.x, tgt.y, tgt.z, DROP_MSG[item.target] || '정리 완료!', isTrash ? '#059669' : '#4f46e5', false, true);
+          flyingItems.push({
+            mesh: item.mesh, start: startVec, end: endVec, t: 0,
+            onDone: () => {
+              itemsGroup.remove(item.mesh);
+              disposeObject(item.mesh);
+              if (!isTrash) addOrganizedItemVisually(item);
+            }
+          });
+        } else {
+          const startBack = item.mesh.position.clone();
+          const endBack = new THREE.Vector3(dragStartPos.x, 0, dragStartPos.z);
+          SoundFX.error();
+          let msg = `${tgt.label}로 드래그하세요!`;
+          if (binFull && dist <= tgt.radius) msg = '🧺 꽉 찼어요! 먼저 통을 눌러 비우세요';
+          else if (item.type === 'trash') {
+            const other = DROP_TARGETS[item.target === 'recycle' ? 'trashbin' : 'recycle'];
+            if (other && Math.hypot(item.mesh.position.x - other.x, item.mesh.position.z - other.z) <= other.radius) {
+              msg = item.target === 'recycle' ? '♻️ 캔·페트병·상자는 분리수거함으로!' : '🗑️ 이건 일반 쓰레기예요! 쓰레기통으로!';
+            }
+          }
+          addFloatPopup3D(dragStartPos.x, 0.75, dragStartPos.z, msg, '#d97706');
+          targetBeacon.position.set(tgt.x, 0.9, tgt.z);
+          targetBeacon.visible = true;
+          setTimeout(() => { if (!draggedItem) targetBeacon.visible = false; }, 750);
+          flyingItems.push({
+            mesh: item.mesh, start: startBack, end: endBack, t: 0, keepScale: true,
+            onDone: () => {
+              item.mesh.position.set(dragStartPos.x, 0, dragStartPos.z);
+              if (item.mesh.userData.ring) item.mesh.userData.ring.visible = true;
+            }
+          });
         }
       });
 
@@ -2792,12 +3533,57 @@
       const feverTimerEl = document.getElementById('fever-timer-label');
       let remainingItemsCount = 0;
 
+      // 루프 안에서 오류가 한 번 나도 3D 화면이 멈추지 않도록 감싼다
       function tickSimulation() {
-        if (document.visibilityState !== 'visible') {
-          animFrameId = requestAnimationFrame(tickSimulation);
-          return;
+        animFrameId = requestAnimationFrame(tickSimulation);
+        if (document.visibilityState !== 'visible' || webglLost) return;
+        try {
+          tickSimulationFrame();
+        } catch (err) {
+          console.error('[tickSimulation]', err);
         }
+      }
+
+      function tickSimulationFrame() {
         const t = performance.now() * 0.003;
+
+        // 황금 드론 이동·출현
+        if (goldenDrone) {
+          goldenDrone.x += goldenDrone.vx; goldenDrone.z += goldenDrone.vz;
+          if (goldenDrone.x < -4.1 || goldenDrone.x > 4.1) goldenDrone.vx *= -1;
+          if (goldenDrone.z < -3.9 || goldenDrone.z > 4.1) goldenDrone.vz *= -1;
+          goldenDrone.mesh.position.set(goldenDrone.x, 0.85 + Math.sin(t * 4) * 0.16, goldenDrone.z);
+          goldenDrone.mesh.rotation.y = t * 3.2;
+          goldenDrone.life--;
+          if (goldenDrone.life <= 0) {
+            ticketsGroup.remove(goldenDrone.mesh);
+            goldenDrone = null;
+          }
+        } else if (!roomCleared && remainingItemsCount > 0) {
+          droneSpawnCooldown--;
+          if (droneSpawnCooldown <= 0) {
+            const cdBase = state.activePerk === 'hunter' ? 1350 : 2700;
+            droneSpawnCooldown = cdBase + Math.floor(Math.random() * 900);
+            spawnGoldenDrone();
+          }
+        }
+
+        // 쓰러진 물건이 일어서는 애니메이션
+        for (let i = tweens.length - 1; i >= 0; i--) {
+          const tw = tweens[i];
+          tw.t = Math.min(1, tw.t + 0.05);
+          const e = 1 - Math.pow(1 - tw.t, 3);
+          tw.body.rotation.z = tw.from.rz * (1 - e);
+          tw.body.position.x = tw.from.x * (1 - e);
+          tw.body.position.y = tw.from.y * (1 - e) + Math.sin(tw.t * Math.PI) * 0.25;
+          if (tw.t >= 1) tweens.splice(i, 1);
+        }
+
+        // 꽉 찬 쓰레기통 빨간 링 깜빡임
+        for (const id of ['trashbin', 'recycle']) {
+          const f = layout.furn[id];
+          if (f && f.spec.refs && f.spec.refs.ring.visible) f.spec.refs.ring.scale.setScalar(1 + Math.sin(t * 5) * 0.08);
+        }
 
         if (camShake > 0) {
           camShake *= 0.84;
@@ -2959,7 +3745,6 @@
         }
 
         renderer.render(scene, camera);
-        animFrameId = requestAnimationFrame(tickSimulation);
       }
 
       // ============================================================
@@ -3243,9 +4028,10 @@
       }
 
       function updateCleanlinessUI() {
-        const total = roomItems.length + 3; // +3 for bed, plant, window
-        const cleaned = roomItems.filter(it => it.cleaned).length + (bedMade ? 1 : 0) + (plantWatered ? 1 : 0) + (windowCleaned ? 1 : 0);
-        const pct = Math.round((cleaned / total) * 100);
+        const reqChores = chores.filter(c => c.required);
+        const total = roomItems.length + reqChores.length;
+        const cleaned = roomItems.filter(it => it.cleaned).length + reqChores.filter(c => c.done).length;
+        const pct = total > 0 ? Math.round((cleaned / total) * 100) : 0;
         document.getElementById('clean-pct-label').textContent = `${pct}%`;
         document.getElementById('clean-bar').style.width = `${pct}%`;
 
@@ -3267,26 +4053,32 @@
           : 'text-[10px] px-1.5 py-0.5 rounded bg-indigo-200/80 text-indigo-900';
 
         const countRem = (type) => roomItems.filter(it => !it.cleaned && it.type === type).length;
+        const countAll = (type) => roomItems.filter(it => it.type === type).length;
         const pills = [
-          { label: '🗑️ 쓰레기', rem: countRem('trash') },
-          { label: '📚 물건·옷', rem: countRem('tidy') },
-          { label: '🛏️ 이불', rem: bedMade ? 0 : 1 },
-          { label: '🪴 화분', rem: plantWatered ? 0 : 1 },
-          { label: '🪟 창문', rem: windowCleaned ? 0 : 1 },
-          { label: '🪶 먼지', rem: countRem('surfaceDust') },
-          { label: '🔌 청소기', rem: countRem('floorDust') },
-          { label: '🧽 얼룩', rem: countRem('spill') }
-        ];
+          { label: '🗑️ 쓰레기', type: 'trash' },
+          { label: '📚 물건 정리', type: 'tidy' },
+          { label: '🪑 세우기', type: 'knocked' },
+          { label: '💰 줍기', type: 'pickup' },
+          { label: '🪶 먼지·거미줄', type: 'surfaceDust' },
+          { label: '🔌 바닥 먼지', type: 'floorDust' },
+          { label: '🧽 얼룩', type: 'spill' }
+        ].filter(p => countAll(p.type) > 0)
+          .map(p => ({ label: p.label, rem: countRem(p.type) }))
+          .concat(reqChores.map(c => ({ label: `${c.icon} ${c.label}`, rem: c.done ? 0 : 1 })));
+        const fullBins = Object.values(binState).filter(b => b.fill >= b.cap).length;
+        if (fullBins) pills.unshift({ label: '🧺 통 비우기', rem: fullBins });
+
         const setBadge = (id, n) => {
           const b = document.getElementById(id);
           if (!b) return;
           if (n <= 0) { b.textContent = '✓'; b.className = 'px-1.5 py-0.2 rounded-full bg-emerald-500/35 text-emerald-200 text-[10px] font-black'; }
           else { b.textContent = n; b.className = 'px-1.5 py-0.2 rounded-full bg-black/30 text-white text-[10px] font-black'; }
         };
-        setBadge('badge-hand', countRem('trash') + countRem('tidy') + (bedMade ? 0 : 1) + (plantWatered ? 0 : 1));
+        const choreRem = (kind) => reqChores.filter(c => !c.done && c.kind === kind).length;
+        setBadge('badge-hand', countRem('trash') + countRem('tidy') + countRem('knocked') + countRem('pickup') + choreRem('tap'));
         setBadge('badge-duster', countRem('surfaceDust'));
         setBadge('badge-vacuum', countRem('floorDust'));
-        setBadge('badge-mop', countRem('spill') + (windowCleaned ? 0 : 1));
+        setBadge('badge-mop', countRem('spill') + choreRem('wipe'));
 
         document.getElementById('task-pills').innerHTML = pills.map(p => `
           <span class="px-2 py-0.5 rounded-full border ${
