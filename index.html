@@ -89,16 +89,16 @@
   </div>
 
   <!-- Ultra-Slim Single-Row Top HUD Bar -->
-  <header id="top-hud" style="top: max(8px, env(safe-area-inset-top));" class="fixed inset-x-2 z-30 flex items-center justify-between gap-1.5 bg-stone-900/80 backdrop-blur-md text-white border border-white/15 rounded-2xl px-2.5 py-1.5 shadow-lg">
-    <div class="flex items-center gap-2 min-w-0">
+  <header id="top-hud" style="top: max(8px, env(safe-area-inset-top));" class="fixed inset-x-2 z-30 flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-1.5 gap-y-1 bg-stone-900/80 backdrop-blur-md text-white border border-white/15 rounded-2xl px-2.5 py-1.5 shadow-lg">
+    <div class="flex items-center gap-2 min-w-0 w-full sm:w-auto order-2 sm:order-1">
       <div class="hidden md:flex items-center gap-1.5 min-w-0">
         <span class="text-sm">🧹</span>
         <span id="room-name-label" class="text-xs font-bold text-stone-100 truncate">Lv.1 반지하 원룸 · 1일차</span>
         <span id="rank-badge" class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/25 text-amber-300 whitespace-nowrap">방구석 청소부</span>
       </div>
 
-      <div class="flex items-center gap-1.5 shrink-0">
-        <div class="w-20 sm:w-28">
+      <div class="flex items-center gap-1.5 flex-1 min-w-0 sm:flex-none sm:shrink-0">
+        <div class="w-full sm:w-28">
           <div class="flex items-center justify-between text-[10px] font-bold leading-none mb-0.5">
             <span class="text-stone-300">✨ <span id="clean-pct-label" class="text-amber-300">0%</span></span>
             <span id="combo-badge" class="hidden text-orange-300">x2</span>
@@ -135,9 +135,9 @@
     </div>
 
     <!-- Right: Wealth, Lotto, Shop & Controls -->
-    <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
-      <div class="bg-emerald-500/20 border border-emerald-400/30 rounded-xl px-2 py-1 text-right leading-none">
-        <div id="wealth-display" class="text-xs sm:text-sm font-black text-emerald-300 max-w-[96px] sm:max-w-[140px] truncate">₩0</div>
+    <div class="flex items-center gap-1 sm:gap-1.5 w-full sm:w-auto order-1 sm:order-2">
+      <div class="mr-auto sm:mr-0 bg-emerald-500/20 border border-emerald-400/30 rounded-xl px-2 py-1 text-right leading-none">
+        <div id="wealth-display" class="text-xs sm:text-sm font-black text-emerald-300 max-w-[150px] truncate">₩0</div>
         <div id="passive-display" class="hidden sm:block text-[9px] font-semibold text-emerald-200/80 mt-0.5">+₩0/초</div>
       </div>
 
@@ -171,7 +171,7 @@
   </header>
 
   <!-- Collapsible Task Checklist & Daily Mission Popover -->
-  <div id="tasks-popover" class="hidden fixed top-14 left-2 z-30 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-3 shadow-xl w-[min(310px,calc(100vw-16px))] space-y-2.5">
+  <div id="tasks-popover" class="hidden fixed top-[96px] sm:top-14 left-2 z-30 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-3 shadow-xl w-[min(310px,calc(100vw-16px))] space-y-2.5">
     <div class="flex items-center justify-between">
       <span class="text-xs font-extrabold text-stone-800">📋 오늘의 청소 &amp; 미션</span>
       <button id="tasks-close-btn" type="button" class="text-xs text-stone-400 hover:text-stone-700 font-bold px-1">✕</button>
@@ -199,7 +199,7 @@
   </div>
 
   <!-- Theme Switcher Popover -->
-  <div id="theme-popover" class="hidden fixed top-14 left-2 sm:left-40 z-30 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-3 shadow-xl w-[min(300px,calc(100vw-16px))] space-y-2">
+  <div id="theme-popover" class="hidden fixed top-[96px] sm:top-14 left-2 sm:left-40 z-30 bg-white/95 backdrop-blur-md border border-stone-200 rounded-2xl p-3 shadow-xl w-[min(300px,calc(100vw-16px))] space-y-2">
     <div class="flex items-center justify-between">
       <span class="text-xs font-extrabold text-stone-800">🚪 3D 방 컨셉 스킨</span>
       <button id="theme-close-btn" type="button" class="text-xs text-stone-400 hover:text-stone-700 font-bold px-1">✕</button>
@@ -213,10 +213,10 @@
   </div>
 
   <!-- Active Drag/Action Pill -->
-  <div id="action-status-pill" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-30 bg-stone-900/90 backdrop-blur text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/15 shadow-lg"></div>
-  <div id="first-guide-pill" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-25 bg-stone-900/85 backdrop-blur text-amber-200 text-[11px] sm:text-xs font-bold px-3.5 py-1.5 rounded-full border border-amber-400/35 shadow-lg pointer-events-none whitespace-nowrap">👆 쓰레기를 쓰레기통으로 드래그하거나, 펼쳐진 옷을 탭해 개어 보세요!</div>
+  <div id="action-status-pill" class="hidden fixed top-[96px] sm:top-14 left-1/2 -translate-x-1/2 z-30 bg-stone-900/90 backdrop-blur text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/15 shadow-lg"></div>
+  <div id="first-guide-pill" class="hidden fixed top-[96px] sm:top-14 left-1/2 -translate-x-1/2 z-25 bg-stone-900/85 backdrop-blur text-amber-200 text-[11px] sm:text-xs font-bold px-3.5 py-1.5 rounded-full border border-amber-400/35 shadow-lg pointer-events-none whitespace-nowrap">👆 쓰레기를 쓰레기통으로 드래그하거나, 펼쳐진 옷을 탭해 개어 보세요!</div>
   <button id="next-goal-pill" type="button" title="클릭해 상점에서 확인하기"
-    class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-20 bg-stone-900/75 hover:bg-stone-900/90 backdrop-blur text-stone-100 text-[10px] sm:text-[11px] font-bold px-3 py-1 rounded-full border border-white/15 shadow flex items-center gap-2 transition max-w-[calc(100vw-24px)]">
+    class="hidden fixed top-[96px] sm:top-14 left-1/2 -translate-x-1/2 z-20 bg-stone-900/75 hover:bg-stone-900/90 backdrop-blur text-stone-100 text-[10px] sm:text-[11px] font-bold px-3 py-1 rounded-full border border-white/15 shadow flex items-center gap-2 transition max-w-[calc(100vw-24px)]">
     <span id="next-goal-text" class="truncate">🎯 다음 목표: 햇살 오피스텔</span>
     <span class="w-14 sm:w-20 h-1.5 bg-white/15 rounded-full overflow-hidden shrink-0">
       <span id="next-goal-bar" class="block h-full bg-amber-400 transition-all duration-300" style="width: 0%"></span>
@@ -225,7 +225,7 @@
   </button>
 
   <!-- Breaking Jackpot News Banner -->
-  <div id="jackpot-news-banner" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-stone-950 font-black text-xs sm:text-sm px-5 py-2 rounded-full shadow-2xl border-2 border-white">
+  <div id="jackpot-news-banner" class="hidden fixed top-[96px] sm:top-14 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-stone-950 font-black text-xs sm:text-sm px-5 py-2 rounded-full shadow-2xl border-2 border-white">
   </div>
 
   <!-- Floating Room Complete Banner -->
@@ -393,7 +393,7 @@
         <!-- Double-or-Nothing Challenge after reveal -->
         <button id="double-chance-btn" type="button"
           class="hidden w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm shadow-md transition">
-          🎲 당첨금 2.2배 도전! (성공 50% / 실패 시 35%)
+          🎲 당첨금 2.2배 도전! (성공 40% / 실패 시 20%)
         </button>
 
         <div class="grid grid-cols-2 gap-2">
@@ -552,21 +552,21 @@
           desc: '좁지만 아늑한 시작의 방. 쓰레기·이불·창문·화분까지 싹 관리해 보세요!'
         },
         {
-          id: 1, name: '햇살 오피스텔', cost: 400000, bg: 0x24262b, floorStyle: 'oakLight', viewStyle: 'sunny',
+          id: 1, name: '햇살 오피스텔', cost: 800000, bg: 0x24262b, floorStyle: 'oakLight', viewStyle: 'sunny',
           wallColor: 0xf4efe6, rugColor: 0xd97706, bedBlanket: 0x0d9488, woodColor: 0xb6895b,
           trashCount: 6, tidyCount: 6, floorDustCount: 8, surfaceDustCount: 4, spillCount: 4,
           ticketMult: 2.5, clearBonus: 150000,
           desc: '넓은 햇살 창문과 밝은 오크 원목! 당첨금 배율 2.5배!'
         },
         {
-          id: 2, name: '한강뷰 아파트', cost: 3500000, bg: 0x121926, floorStyle: 'ashGrey', viewStyle: 'hangang',
+          id: 2, name: '한강뷰 아파트', cost: 6000000, bg: 0x121926, floorStyle: 'ashGrey', viewStyle: 'hangang',
           wallColor: 0xe8edf2, rugColor: 0x2563eb, bedBlanket: 0x1d4ed8, woodColor: 0x5c4b41,
           trashCount: 7, tidyCount: 7, floorDustCount: 10, surfaceDustCount: 5, spillCount: 4,
           ticketMult: 7, clearBonus: 600000,
           desc: '창밖으로 한강 야경과 스카이라인이 펼쳐집니다. 당첨금 배율 7배!'
         },
         {
-          id: 3, name: '스카이 펜트하우스', cost: 18000000, bg: 0x120f0c, floorStyle: 'marble', viewStyle: 'penthouse',
+          id: 3, name: '스카이 펜트하우스', cost: 40000000, bg: 0x120f0c, floorStyle: 'marble', viewStyle: 'penthouse',
           wallColor: 0xf5f0e6, rugColor: 0x059669, bedBlanket: 0x991b1b, woodColor: 0x3b2f2f,
           trashCount: 8, tidyCount: 8, floorDustCount: 12, surfaceDustCount: 6, spillCount: 5,
           ticketMult: 14, clearBonus: 2000000,
@@ -612,31 +612,31 @@
       }
 
       const DECORS = [
-        { id: 'painting', name: '명화 골드 액자', icon: '🖼️', cost: 120000, income: 2500, desc: '뒷벽에 고급 명화 액자를 걸어 방 품격을 높입니다.' },
-        { id: 'aquarium', name: '3D 대형 수족관', icon: '🐟', cost: 550000, income: 12000, desc: '열대어가 헤엄치는 발광 수족관을 배치합니다.' },
-        { id: 'sofa', name: '럭셔리 가죽 소파', icon: '🛋️', cost: 1800000, income: 40000, desc: '러그 옆에 고급 3D 소파를 추가합니다.' },
-        { id: 'trophy', name: '황금 잭팟 트로피', icon: '🏆', cost: 8500000, income: 210000, desc: '부호의 상징! 방에 빛나는 황금 트로피를 세웁니다.' }
+        { id: 'painting', name: '명화 골드 액자', icon: '🖼️', cost: 120000, income: 150, desc: '뒷벽에 고급 명화 액자를 걸어 방 품격을 높입니다.' },
+        { id: 'aquarium', name: '3D 대형 수족관', icon: '🐟', cost: 550000, income: 600, desc: '열대어가 헤엄치는 발광 수족관을 배치합니다.' },
+        { id: 'sofa', name: '럭셔리 가죽 소파', icon: '🛋️', cost: 1800000, income: 1800, desc: '러그 옆에 고급 3D 소파를 추가합니다.' },
+        { id: 'trophy', name: '황금 잭팟 트로피', icon: '🏆', cost: 8500000, income: 7500, desc: '부호의 상징! 방에 빛나는 황금 트로피를 세웁니다.' }
       ];
 
       const UPGRADES = [
         { id: 'broomSize', name: '고출력 청소기·물걸레·먼지떨이', icon: '🔌', desc: '청소기 흡입 범위, 물걸레·먼지떨이 속도가 빨라집니다.', baseCost: 25000, mult: 2.1, max: 6 },
         { id: 'lottoRate', name: '보물찾기 직감', icon: '🍀', desc: '쓰레기·서랍·이불·얼룩에서 로또 발견 확률이 오릅니다.', baseCost: 40000, mult: 2.2, max: 6 },
         { id: 'luckMult', name: '황금 손가락', icon: '✨', desc: '로또 당첨 확률과 당첨 금액이 크게 증가합니다.', baseCost: 80000, mult: 2.5, max: 6 },
-        { id: 'roboVac', name: '로봇 청소기', icon: '🤖', desc: '바닥 먼지를 자동 흡입하고 떨어진 로또를 주워옵니다.', baseCost: 150000, mult: 2.8, max: 4 }
+        { id: 'roboVac', name: '로봇 청소기', icon: '🤖', desc: '바닥 먼지를 몇 개만 대신 빨아들여요. Lv1 2개 · Lv2 4개 · Lv3 2대×3개 (방마다 충전, 보상 절반)', baseCost: 150000, mult: 2.8, max: 3 }
       ];
 
       const ASSETS = [
-        { id: 'savings', name: '고금리 적금 통장', icon: '🏦', baseCost: 60000, income: 1200, mult: 1.32 },
-        { id: 'vending', name: '무인 아이스크림 가게', icon: '🍦', baseCost: 450000, income: 9500, mult: 1.35 },
-        { id: 'cafe', name: '역세권 감성 카페', icon: '☕', baseCost: 2800000, income: 62000, mult: 1.38 },
-        { id: 'building', name: '강남 꼬마빌딩', icon: '🏢', baseCost: 18000000, income: 420000, mult: 1.40 },
-        { id: 'tower', name: '글로벌 랜드마크 타워', icon: '🏙️', baseCost: 120000000, income: 3200000, mult: 1.42 }
+        { id: 'savings', name: '고금리 적금 통장', icon: '🏦', baseCost: 60000, income: 80, mult: 1.32 },
+        { id: 'vending', name: '무인 아이스크림 가게', icon: '🍦', baseCost: 450000, income: 500, mult: 1.35 },
+        { id: 'cafe', name: '역세권 감성 카페', icon: '☕', baseCost: 2800000, income: 2600, mult: 1.38 },
+        { id: 'building', name: '강남 꼬마빌딩', icon: '🏢', baseCost: 18000000, income: 14000, mult: 1.40 },
+        { id: 'tower', name: '글로벌 랜드마크 타워', icon: '🏙️', baseCost: 120000000, income: 80000, mult: 1.42 }
       ];
 
       const PERKS = [
         { id: 'artisan', name: '장인의 손길', icon: '✋', badge: '✋ 크리 30%', desc: '수동 청소 크리티컬 확률 30% (2.5배) & 콤보 유지시간 1.5배!' },
         { id: 'hunter',  name: '보물사냥꾼',  icon: '🍀', badge: '🍀 로또 UP', desc: '숨은 로또·황금 조각 발견율 +25% & 황금 드론 출현 속도 2배!' },
-        { id: 'automax', name: '풀오토 부스터', icon: '🤖', badge: '🤖 자동 +50%', desc: '로봇 청소기 속도 2배 & 불로소득 +50% (단, 수동 크리티컬 비활성)' }
+        { id: 'automax', name: '풀오토 부스터', icon: '🤖', badge: '🤖 자동 +50%', desc: '로봇 청소기 배터리 2배 & 불로소득 +50% (단, 수동 크리티컬 비활성)' }
       ];
 
       const MILESTONES = [
@@ -760,6 +760,9 @@
         for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
         return arr;
       }
+
+      // 청소로 버는 돈이 게임의 중심이 되도록 모든 청소 보상에 곱한다
+      const CLEAN_REWARD_MULT = 1.5;
 
       const DAILY_MISSIONS = [
         { id: 'care', desc: '🧹 오늘의 집안일(이불·화분·창문 등) 모두 끝내기', rewardMult: 1.0 },
@@ -984,18 +987,20 @@
         const luckLvl = ticket.lockedLuck !== undefined ? ticket.lockedLuck : (state.upgrades.luckMult || 0);
         const prestigeMult = 1 + (state.prestigeCount || 0) * 0.5;
         const mult = (ticket.lockedMult !== undefined ? ticket.lockedMult : (room.ticketMult * (1 + luckLvl * 0.25))) * prestigeMult;
+        // 5번 연속 3등 미만이면 다음 장은 3등 이상 보장
         const pityTriggered = (state.pityCount || 0) >= 5;
-        const roll = pityTriggered ? Math.min(Math.random(), 0.27) : Math.random();
+        const roll = pityTriggered ? Math.min(Math.random(), 0.10) : Math.random();
         const boost = Math.min(0.18, luckLvl * 0.022);
 
-        let matches = 2, bonusMatch = false;
-        let rankName = '🪙 로또 6/45 5등 당첨!';
-        let basePrize = 12000;
+        let matches = 1, bonusMatch = false;
+        let rankName = '😅 아쉽게도 꽝! 다음 기회에';
+        let basePrize = 0;
 
-        if (roll < Math.min(0.12, 0.02 + boost * 0.35)) { state.pityCount = 0; matches = 6; rankName = '🎉 로또 6/45 1등 대박!'; basePrize = 3500000; }
-        else if (roll < Math.min(0.25, 0.08 + boost * 0.7)) { state.pityCount = 0; matches = 5; bonusMatch = true; rankName = '💎 로또 6/45 2등 (보너스)!'; basePrize = 850000; }
-        else if (roll < Math.min(0.50, 0.28 + boost)) { state.pityCount = 0; matches = 4; rankName = '🏆 로또 6/45 3등 당첨!'; basePrize = 160000; }
-        else if (roll < Math.min(0.85, 0.65 + boost)) { state.pityCount = (state.pityCount || 0) + 1; matches = 3; rankName = '🍀 로또 6/45 4등 당첨!'; basePrize = 42000; }
+        if (roll < 0.003 + boost * 0.05) { state.pityCount = 0; matches = 6; rankName = '🎉 로또 6/45 1등 대박!'; basePrize = 2000000; }
+        else if (roll < 0.018 + boost * 0.2) { state.pityCount = 0; matches = 5; bonusMatch = true; rankName = '💎 로또 6/45 2등 (보너스)!'; basePrize = 150000; }
+        else if (roll < 0.10 + boost * 0.5) { state.pityCount = 0; matches = 4; rankName = '🏆 로또 6/45 3등 당첨!'; basePrize = 20000; }
+        else if (roll < 0.35 + boost) { state.pityCount = (state.pityCount || 0) + 1; matches = 3; rankName = '🍀 로또 6/45 4등 당첨!'; basePrize = 5000; }
+        else if (roll < 0.70) { state.pityCount = (state.pityCount || 0) + 1; matches = 2; rankName = '🪙 로또 6/45 5등 당첨!'; basePrize = 1000; }
         else { state.pityCount = (state.pityCount || 0) + 1; }
 
         const myNums = ticket.myNums;
@@ -1022,7 +1027,7 @@
         const prestigeMult = 1 + (state.prestigeCount || 0) * 0.5;
         const mult = room.ticketMult * (1 + luckLvl * 0.25) * prestigeMult;
         const pityTriggered = (state.pityCount || 0) >= 5;
-        const roll = pityTriggered ? Math.min(Math.random(), 0.24) : Math.random();
+        const roll = pityTriggered ? Math.min(Math.random(), 0.105) : Math.random();
         const boost = luckLvl * 0.025;
         const actualKind = kind === 'auto' ? (Math.random() < 0.48 ? 'lotto645' : 'scratch') : kind;
 
@@ -1039,20 +1044,20 @@
           return tk;
         }
 
-        let rankName = '위로 보너스', basePrize = 3000, symbols = ['🍀', '🪙', '✨'];
+        let rankName = '위로 보너스', basePrize = 300, symbols = ['🍀', '🪙', '✨'];
         if (actualKind === 'golden') {
-          if (roll < 0.07 + boost * 0.5) { rankName = '👑 황금 1등 대박!'; basePrize = 5800000; symbols = ['👑', '👑', '👑']; }
-          else if (roll < 0.28 + boost) { rankName = '💎 황금 2등 당첨!'; basePrize = 1500000; symbols = ['💎', '💎', '💎']; }
-          else if (roll < 0.68) { rankName = '🏆 황금 3등 당첨!'; basePrize = 420000; symbols = ['🏆', '🏆', '🏆']; }
-          else { rankName = '✨ 황금 4등 당첨!'; basePrize = 160000; symbols = ['💰', '💰', '💰']; }
+          if (roll < 0.015 + boost * 0.2) { rankName = '👑 황금 1등 대박!'; basePrize = 2000000; symbols = ['👑', '👑', '👑']; }
+          else if (roll < 0.10 + boost * 0.5) { rankName = '💎 황금 2등 당첨!'; basePrize = 250000; symbols = ['💎', '💎', '💎']; }
+          else if (roll < 0.50) { rankName = '🏆 황금 3등 당첨!'; basePrize = 50000; symbols = ['🏆', '🏆', '🏆']; }
+          else { rankName = '✨ 황금 4등 당첨!'; basePrize = 15000; symbols = ['💰', '💰', '💰']; }
         } else {
-          if (roll < 0.015 + boost * 0.3) { rankName = '🎉 즉석 1등 잭팟!'; basePrize = 2600000; symbols = ['7️⃣', '7️⃣', '7️⃣']; }
-          else if (roll < 0.08 + boost * 0.6) { rankName = '💎 즉석 2등 당첨!'; basePrize = 460000; symbols = ['💎', '💎', '💎']; }
-          else if (roll < 0.25 + boost) { rankName = '🏆 즉석 3등 당첨!'; basePrize = 105000; symbols = ['🏆', '🏆', '🏆']; }
-          else if (roll < 0.58 + boost) { rankName = '🍀 즉석 4등 당첨!'; basePrize = 32000; symbols = ['🍀', '🍀', '🍀']; }
-          else if (roll < 0.88) { rankName = '🪙 즉석 5등 당첨!'; basePrize = 10000; symbols = ['🪙', '🪙', '🪙']; }
-          else { rankName = '😅 꽝 (재활용 보상)'; basePrize = 3000; symbols = ['🍀', '🪙', '❌']; }
-          if (roll < 0.25 + boost) state.pityCount = 0; else state.pityCount = (state.pityCount || 0) + 1;
+          if (roll < 0.005 + boost * 0.05) { rankName = '🎉 즉석 1등 잭팟!'; basePrize = 1000000; symbols = ['7️⃣', '7️⃣', '7️⃣']; }
+          else if (roll < 0.025 + boost * 0.2) { rankName = '💎 즉석 2등 당첨!'; basePrize = 100000; symbols = ['💎', '💎', '💎']; }
+          else if (roll < 0.105 + boost * 0.5) { rankName = '🏆 즉석 3등 당첨!'; basePrize = 15000; symbols = ['🏆', '🏆', '🏆']; }
+          else if (roll < 0.355 + boost) { rankName = '🍀 즉석 4등 당첨!'; basePrize = 4000; symbols = ['🍀', '🍀', '🍀']; }
+          else if (roll < 0.655) { rankName = '🪙 즉석 5등 당첨!'; basePrize = 1000; symbols = ['🪙', '🪙', '🪙']; }
+          else { rankName = '😅 꽝 (재활용 보상)'; basePrize = 300; symbols = ['🍀', '🪙', '❌']; }
+          if (roll < 0.105 + boost * 0.5) state.pityCount = 0; else state.pityCount = (state.pityCount || 0) + 1;
         }
 
         return { id: Date.now() + Math.random(), kind: actualKind, rankName, symbols, prize: Math.round((basePrize * mult) / 100) * 100 };
@@ -1065,11 +1070,11 @@
         const c = document.createElement('canvas'); c.width = 512; c.height = 512;
         const g = c.getContext('2d');
         if (style === 'kidsMat') {
-          const cols = ['#fde68a', '#bae6fd', '#fbcfe8', '#bbf7d0'];
+          const cols = ['#d9a441', '#5b9bd5', '#d47fa6', '#6bb38a'];
           for (let r = 0; r < 4; r++) for (let col = 0; col < 4; col++) {
             g.fillStyle = cols[(r + col) % 4];
             g.fillRect(col * 128, r * 128, 128, 128);
-            g.strokeStyle = 'rgba(255,255,255,0.65)'; g.lineWidth = 4;
+            g.strokeStyle = 'rgba(255,255,255,0.35)'; g.lineWidth = 4;
             g.strokeRect(col * 128 + 2, r * 128 + 2, 124, 124);
           }
         } else if (style === 'castleStone') {
@@ -1133,6 +1138,8 @@
         }
         const tex = new THREE.CanvasTexture(c);
         tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(3, 3);
+        // 아이방 매트는 색을 그대로 보여 줘야 물건이 묻히지 않는다 (sRGB로 읽지 않으면 하얗게 바랜다)
+        if (style === 'kidsMat') tex.encoding = THREE.sRGBEncoding;
         return tex;
       }
 
@@ -1234,6 +1241,8 @@
 
       let camAngle = Math.PI * 0.25, targetCamAngle = Math.PI * 0.25;
       let camRadius = 14.0, targetCamRadius = 14.0;
+      // 화면 비율에 맞춰 방 전체가 들어오는 거리와 줌아웃 한계 (세로로 긴 휴대폰일수록 멀어진다)
+      let camFitRadius = 14.0, camMaxRadius = 20.0;
       let camHeight = 11.4;
 
       let roomItems = [];
@@ -2399,6 +2408,7 @@
         const led = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.24, 24), new THREE.MeshBasicMaterial({ color: isProRobo ? 0xfbbf24 : 0x38bdf8, side: THREE.DoubleSide }));
         led.rotation.x = -Math.PI / 2; led.position.y = 0.145;
         g.add(body, led);
+        g.userData.led = led;
         return g;
       }
 
@@ -2558,6 +2568,7 @@
 
         remainingItemsCount = roomItems.length;
         syncRoboVacs();
+        rechargeRoboVacs();
         // Shop Red-Dot & Next-Goal Progress Bar
         const { count: shopCnt, bestCta } = getShopAffordableInfo();
         const shopBadge = document.getElementById('shop-badge');
@@ -2651,7 +2662,7 @@
         doubleUsed = false;
         const dblBtn = document.getElementById('double-chance-btn');
         if (dblBtn && activeTicket.prize >= 10000) {
-          dblBtn.textContent = `🎲 ${formatKRW(lastWonPrize)} → 2.2배 도전! (성공 50% / 실패 시 35%)`;
+          dblBtn.textContent = `🎲 ${formatKRW(lastWonPrize)} → 2.2배 도전! (성공 40% / 실패 시 20%)`;
           dblBtn.classList.remove('hidden');
         }
         const craftBtn2 = document.getElementById('craft-golden-btn');
@@ -2681,15 +2692,30 @@
         }
       }
 
+      // 로봇 청소기는 도우미일 뿐: 방마다 정해진 개수만 치우고 방전된다
+      function roboBatteryPerUnit() {
+        const lv = state.upgrades.roboVac || 0;
+        const per = lv >= 3 ? 3 : (lv === 2 ? 4 : 2);
+        return per * (state.activePerk === 'automax' ? 2 : 1);
+      }
+      function setRoboLed(rv) {
+        const led = rv.mesh.userData.led;
+        if (led) led.material.color.setHex(rv.battery > 0 ? ((state.upgrades.roboVac || 0) >= 2 ? 0xfbbf24 : 0x38bdf8) : 0xef4444);
+      }
       function syncRoboVacs() {
-        const count = state.upgrades.roboVac || 0;
+        const lv = state.upgrades.roboVac || 0;
+        const count = lv >= 3 ? 2 : (lv > 0 ? 1 : 0);
         while (roboVacs.length < count) {
           const pos = randomOpenSpot();
           const ang = Math.random() * Math.PI * 2;
           const mesh = createRoboVacMesh3D(); mesh.position.set(pos.x, 0, pos.z); roboGroup.add(mesh);
-          roboVacs.push({ x: pos.x, z: pos.z, vx: Math.cos(ang) * 0.036, vz: Math.sin(ang) * 0.036, mesh });
+          const rv = { x: pos.x, z: pos.z, vx: Math.cos(ang) * 0.026, vz: Math.sin(ang) * 0.026, mesh, battery: roboBatteryPerUnit() };
+          roboVacs.push(rv); setRoboLed(rv);
         }
         while (roboVacs.length > count) { const rv = roboVacs.pop(); roboGroup.remove(rv.mesh); }
+      }
+      function rechargeRoboVacs() {
+        for (const rv of roboVacs) { rv.battery = roboBatteryPerUnit(); setRoboLed(rv); }
       }
 
       const SHARED_PARTICLE_GEO = new THREE.SphereGeometry(0.075, 5, 5);
@@ -2813,7 +2839,8 @@
         const isCrit = !byRobo && Math.random() < critRate;
         const critMult = isCrit ? 2.5 : 1;
         const prestigeMult = 1 + (state.prestigeCount || 0) * 0.5;
-        const earned = Math.round(item.cash * (1 + (combo - 1) * 0.1) * feverMult * critMult * prestigeMult);
+        const roboMult = byRobo ? 0.5 : 1; // 로봇이 치운 건 절반만
+        const earned = Math.round(item.cash * CLEAN_REWARD_MULT * roboMult * (1 + (combo - 1) * 0.1) * feverMult * critMult * prestigeMult);
         if (isCrit) {
           SoundFX.coin();
           triggerShake(0.16);
@@ -2915,6 +2942,47 @@
       }
 
       const HAND_TYPES = ['trash', 'tidy', 'knocked', 'pickup'];
+      const TOOL_LABEL = { hand: '✋ 손(1)', duster: '🪶 먼지떨이(2)', vacuum: '🔌 청소기(3)', mop: '🧽 물걸레(4)', radar: '🔍 돋보기(5)' };
+      let lastNudgeAt = 0;
+
+      // 다른 도구가 필요할 때: 도구는 그대로 두고, 필요한 도구 버튼을 반짝여 알려 준다
+      function nudgeTool(tool, what) {
+        const btn = document.getElementById('tool-' + tool);
+        if (btn) {
+          btn.classList.add('ring-4', 'ring-amber-300', 'animate-pulse');
+          setTimeout(() => btn.classList.remove('ring-4', 'ring-amber-300', 'animate-pulse'), 900);
+        }
+        const now = performance.now();
+        if (now - lastNudgeAt > 700) {
+          lastNudgeAt = now;
+          SoundFX.error();
+          showToast(`필요한 도구: ${TOOL_LABEL[tool]} — ${what}`);
+        }
+      }
+
+      function handWhat(it) {
+        if (it.type === 'knocked') return `${it.label} 세우기`;
+        if (it.type === 'pickup') return `${it.label} 줍기`;
+        if (it.needsFold && !it.folded) return `${it.label} ${it.kind === 'clothes' ? '개기' : '접기'}`;
+        return `${it.label} 옮기기`;
+      }
+
+      function handAction(it) {
+        if (it.type === 'knocked') { standUpItem(it); return; }
+        if (it.type === 'pickup') {
+          SoundFX.coin();
+          completeItem(it, it.x, 0.1, it.z, `💰 ${it.label} 줍기!`, '#ca8a04');
+          return;
+        }
+        if (it.needsFold && !it.folded) { foldItem(it); return; }
+        draggedItem = it;
+        dragStartPos = { x: it.x, z: it.z };
+        dragMovedDist = 0;
+        SoundFX.pickup();
+        const tgt = DROP_TARGETS[it.target];
+        targetBeacon.position.set(tgt.x, 0.9, tgt.z); targetBeacon.visible = true;
+        showActionStatus(`✋ ${it.label} 집는 중 → ${it.targetLabel}`);
+      }
       const TAP_TIPS = {
         bed: '🛏️ 클릭해서 구겨진 이불 펴기',
         drawer: '🗄️ 클릭해서 책상 서랍 확인하기 (보너스)',
@@ -2994,21 +3062,21 @@
         let bonus = 0;
         if (ch.id === 'bed') {
           state.lastBedDay = state.day;
-          bonus = Math.round(3000 * room.ticketMult * fever);
+          bonus = Math.round(3000 * CLEAN_REWARD_MULT * room.ticketMult * fever);
           addFever(20); SoundFX.placeTidy();
           spawnParticles3D(p.x, p.y, p.z, 0x6366f1, 14);
           addFloatPopup3D(p.x, p.y + 0.45, p.z, `🛏️ 이불 정리 완료! +${formatKRW(bonus)}`, '#4f46e5');
           if (Math.random() < 0.35) spawnHiddenDropAt(p.x * 0.55, p.z * 0.55, 'auto');
         } else if (ch.id === 'drawer') {
           state.lastDrawerDay = state.day;
-          bonus = Math.round(4500 * room.ticketMult);
+          bonus = Math.round(4500 * CLEAN_REWARD_MULT * room.ticketMult);
           SoundFX.drawerSlide();
           spawnParticles3D(p.x, p.y, p.z, 0xfbbf24, 14);
           addFloatPopup3D(p.x, p.y + 0.5, p.z, `🗄️ 서랍 비상금 +${formatKRW(bonus)}!`, '#d97706');
           spawnHiddenDropAt(p.x * 0.6, p.z * 0.6, 'auto');
         } else if (ch.id === 'plant') {
           state.lastPlantDay = state.day;
-          bonus = Math.round(2500 * room.ticketMult);
+          bonus = Math.round(2500 * CLEAN_REWARD_MULT * room.ticketMult);
           addFever(15); SoundFX.waterSplash();
           spawnParticles3D(p.x, p.y + 0.3, p.z, 0x38bdf8, 16);
           addFloatPopup3D(p.x, p.y + 0.7, p.z, `🪴 화분 물주기 완료! +${formatKRW(bonus)}`, '#0284c7');
@@ -3038,7 +3106,7 @@
             ch.done = true; applyChoreVisual(ch);
             const room = ROOMS[state.roomId];
             const base = ch.id === 'scribble' ? 4200 : (ch.id === 'mirror' ? 3200 : 3500);
-            const bonus = Math.round(base * room.ticketMult * (feverFrames > 0 ? 2 : 1));
+            const bonus = Math.round(base * CLEAN_REWARD_MULT * room.ticketMult * (feverFrames > 0 ? 2 : 1));
             state.wealth += bonus; state.totalEarned += bonus;
             addFever(18); SoundFX.placeTidy();
             const msg = ch.id === 'window' ? '🪟 창문 반짝반짝!' : (ch.id === 'mirror' ? '🪞 거울 반짝반짝!' : '🖍️ 낙서 싹 지움!');
@@ -3117,7 +3185,7 @@
         if (!b || b.fill <= 0) return;
         const p = binWorldPt(id);
         const room = ROOMS[state.roomId];
-        const bonus = Math.round(b.fill * 350 * room.ticketMult);
+        const bonus = Math.round(b.fill * 350 * CLEAN_REWARD_MULT * room.ticketMult);
         b.fill = 0;
         state.wealth += bonus; state.totalEarned += bonus;
         if (id === 'trashbin') binBounceTimer = 24;
@@ -3193,7 +3261,7 @@
           const dist = Math.hypot(dx, dy);
           const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
           if (touchPinchDist > 0) {
-            targetCamRadius = Math.max(10.0, Math.min(20.0, targetCamRadius - (dist - touchPinchDist) * 0.025));
+            targetCamRadius = Math.max(10.0, Math.min(camMaxRadius, targetCamRadius - (dist - touchPinchDist) * 0.025));
             targetCamAngle = Math.max(0.18, Math.min(1.4, targetCamAngle - (midX - touchMidX) * 0.008));
           }
           touchPinchDist = dist; touchMidX = midX;
@@ -3203,7 +3271,7 @@
       canvas.addEventListener('contextmenu', (e) => e.preventDefault());
       canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
-        targetCamRadius = Math.max(10.0, Math.min(20.0, targetCamRadius + e.deltaY * 0.008));
+        targetCamRadius = Math.max(10.0, Math.min(camMaxRadius, targetCamRadius + e.deltaY * 0.008));
       }, { passive: false });
 
       canvas.addEventListener('pointerdown', (e) => {
@@ -3228,74 +3296,34 @@
           }
         }
 
-        // Smart Auto-Tool Detection (Eliminates silent failures when tapping with wrong tool!)
-        // 벽 높은 곳(거미줄·가구 위 먼지)은 바닥과 안 만날 수 있으니 바닥 좌표 없이도 검사한다
+        // 도구는 자동으로 바뀌지 않는다. 지금 든 도구로 할 수 있는 일을 먼저 하고,
+        // 할 수 있는 게 없으면 손댄 대상에 맞는 도구를 알려 준다.
         if (state.tool !== 'radar') {
-          // 1. 창문·거울·벽 낙서 → 물걸레
+          const targets = [];
           const wipeHit = chores.find(c => c.kind === 'wipe' && !c.done && c.mesh && raycaster.intersectObject(c.mesh).length > 0);
-          if (wipeHit) {
-            if (state.tool !== 'mop' && state.tool !== 'duster') { selectTool('mop'); showToast(`🧽 물걸레로 자동 전환! 문질러서 ${wipeHit.label}!`); }
-            tryWipeAt(e.clientX, e.clientY);
-            return;
-          }
-          // 2. 가구 위 먼지·거미줄 → 먼지떨이
+          if (wipeHit) targets.push({ tools: ['mop', 'duster'], what: wipeHit.label, act: () => tryWipeAt(e.clientX, e.clientY) });
           const hitSurfDust = roomItems.find(it => !it.cleaned && it.type === 'surfaceDust' && raycaster.ray.distanceToPoint(new THREE.Vector3(it.x, it.y, it.z)) < 0.85);
-          if (hitSurfDust) {
-            if (state.tool !== 'duster') { selectTool('duster'); showToast('🪶 먼지떨이로 자동 전환! 문질러 털어내세요.'); }
-            tryDustSurfaceAt(e.clientX, e.clientY);
-            return;
-          }
-          // 3. 꽉 찬 쓰레기통 → 눌러서 비우기
+          if (hitSurfDust) targets.push({ tools: ['duster'], what: `${hitSurfDust.label} 털기`, act: () => tryDustSurfaceAt(e.clientX, e.clientY) });
           const fullBin = findFullBinUnderRay();
-          if (fullBin) { emptyBin(fullBin); return; }
-          // 4. 이불·서랍·화분
+          if (fullBin) targets.push({ tools: ['hand'], what: '꽉 찬 통 비우기', act: () => emptyBin(fullBin) });
           const tapHit = chores.find(c => c.kind === 'tap' && !c.done && raycaster.ray.distanceToPoint(c.pt) < c.radius);
-          if (tapHit) { doTapChore(tapHit); return; }
-        }
-
-        if (state.tool !== 'radar' && floorPt) {
-          // 5. 손 정리: 쓰레기·물건 드래그, 쓰러진 물건 세우기, 돈 줍기
-          let closestHand = null, minD = 0.9;
-          for (const it of roomItems) {
-            if (it.cleaned || !HAND_TYPES.includes(it.type)) continue;
-            const d = Math.hypot(floorPt.x - it.x, floorPt.z - it.z);
-            if (d < minD) { minD = d; closestHand = it; }
-          }
-          if (closestHand && (state.tool === 'hand' || minD < 0.62)) {
-            if (state.tool !== 'hand') { selectTool('hand'); showToast('✋ 손 정리로 자동 전환!'); }
-            if (closestHand.type === 'knocked') { standUpItem(closestHand); return; }
-            if (closestHand.type === 'pickup') {
-              SoundFX.coin();
-              completeItem(closestHand, closestHand.x, 0.1, closestHand.z, `💰 ${closestHand.label} 줍기!`, '#ca8a04');
-              return;
+          if (tapHit) targets.push({ tools: ['hand'], what: tapHit.label, act: () => doTapChore(tapHit) });
+          if (floorPt) {
+            let closestHand = null, minD = state.tool === 'hand' ? 0.9 : 0.62;
+            for (const it of roomItems) {
+              if (it.cleaned || !HAND_TYPES.includes(it.type)) continue;
+              const d = Math.hypot(floorPt.x - it.x, floorPt.z - it.z);
+              if (d < minD) { minD = d; closestHand = it; }
             }
-            if (closestHand.needsFold && !closestHand.folded) { foldItem(closestHand); return; }
-            draggedItem = closestHand;
-            dragStartPos = { x: closestHand.x, z: closestHand.z };
-            dragMovedDist = 0;
-            SoundFX.pickup();
-            const tgt = DROP_TARGETS[closestHand.target];
-            targetBeacon.position.set(tgt.x, 0.9, tgt.z); targetBeacon.visible = true;
-            showActionStatus(`✋ ${closestHand.label} 집는 중 → ${closestHand.targetLabel}`);
-            return;
+            if (closestHand) targets.push({ tools: ['hand'], what: handWhat(closestHand), act: () => handAction(closestHand) });
+            const nearSpill = roomItems.find(it => !it.cleaned && it.type === 'spill' && Math.hypot(floorPt.x - it.x, floorPt.z - it.z) < 0.85);
+            if (nearSpill) targets.push({ tools: ['mop'], what: `${nearSpill.label} 닦기`, act: () => tryMopSpillAt(floorPt, e.clientX, e.clientY) });
+            const nearDust = roomItems.find(it => !it.cleaned && it.type === 'floorDust' && Math.hypot(floorPt.x - it.x, floorPt.z - it.z) < 0.85);
+            if (nearDust) targets.push({ tools: ['vacuum'], what: `${nearDust.label} 흡입`, act: () => SoundFX.setVacuumHum(true) });
           }
-
-          // 6. 얼룩 → 물걸레
-          const nearSpill = roomItems.find(it => !it.cleaned && it.type === 'spill' && Math.hypot(floorPt.x - it.x, floorPt.z - it.z) < 0.85);
-          if (nearSpill) {
-            if (state.tool !== 'mop') { selectTool('mop'); showToast(`🧽 물걸레로 자동 전환! 문질러서 ${nearSpill.label}을(를) 닦으세요.`); }
-            tryMopSpillAt(floorPt, e.clientX, e.clientY);
-            return;
-          }
-
-          // 7. 바닥 먼지 → 청소기
-          const nearDust = roomItems.find(it => !it.cleaned && it.type === 'floorDust' && Math.hypot(floorPt.x - it.x, floorPt.z - it.z) < 0.85);
-          if (nearDust && state.tool !== 'vacuum') {
-            selectTool('vacuum');
-            showToast('🔌 청소기로 자동 전환! 누른 채 밀어 흡입하세요.');
-            SoundFX.setVacuumHum(true);
-            return;
-          }
+          const doable = targets.find(t => t.tools.includes(state.tool));
+          if (doable) { doable.act(); return; }
+          if (targets.length) { pointerDown = false; nudgeTool(targets[0].tools[0], targets[0].what); return; }
         }
 
         if (state.tool === 'duster') {
@@ -3357,7 +3385,7 @@
           mopMesh3D.visible = state.tool === 'mop';
 
           if (state.tool === 'vacuum') {
-            const vacRad = 1.0 + (state.upgrades.broomSize || 0) * 0.25;
+            const vacRad = 1.0 + (state.upgrades.broomSize || 0) * 0.12;
             cursorRing.scale.set(vacRad / 0.75, vacRad / 0.75, 1);
             cursorRing.material.color.setHex(0x0ea5e9);
             vacuumMesh3D.position.set(floorPt.x, 0, floorPt.z);
@@ -3517,8 +3545,15 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2));
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
-        const autoDist = w < 640 ? 18.2 : (w < 960 ? 15.6 : 13.8);
-        camRadius = autoDist; targetCamRadius = autoDist;
+        // 방(10x10)을 45도로 보면 가로 폭이 약 14.6, 세로 높이가 약 13 이다.
+        // 그 크기가 화면 가로·세로에 모두 들어오는 카메라 거리를 계산한다.
+        const halfV = THREE.MathUtils.degToRad(camera.fov) / 2;
+        const halfH = Math.atan(Math.tan(halfV) * (w / h));
+        const distNeeded = Math.max(7.3 / Math.tan(halfH), 6.6 / Math.tan(halfV));
+        const distPerRadius = Math.hypot(1, camHeight / 14.8); // 카메라 높이도 반지름에 비례
+        camFitRadius = Math.max(13.8, distNeeded / distPerRadius);
+        camMaxRadius = Math.max(20.0, camFitRadius + 6);
+        camRadius = camFitRadius; targetCamRadius = camFitRadius;
         updateCameraPosition();
         camera.updateProjectionMatrix();
         renderer.render(scene, camera);
@@ -3674,7 +3709,7 @@
         }
 
         if (state.tool === 'vacuum' && pointerDown && lastHitPoint) {
-          const vacRad = 1.05 + (state.upgrades.broomSize || 0) * 0.28;
+          const vacRad = 1.05 + (state.upgrades.broomSize || 0) * 0.12;
           for (const it of roomItems) {
             if (it.cleaned || it.type !== 'floorDust') continue;
             const dx = lastHitPoint.x - it.x, dz = lastHitPoint.z - it.z;
@@ -3727,20 +3762,19 @@
         }
 
         for (const rv of roboVacs) {
-          const spdMul = state.activePerk === 'automax' ? 2.0 : 1.0;
-          const nx = rv.x + rv.vx * spdMul, nz = rv.z + rv.vz * spdMul;
+          if (rv.battery <= 0) continue; // 방전되면 그 자리에 멈춘다
+          const nx = rv.x + rv.vx, nz = rv.z + rv.vz;
           if (nx < -4.3 || nx > 4.3 || isInsideFurniture(nx, rv.z)) rv.vx *= -1; else rv.x = nx;
           if (nz < -4.1 || nz > 4.3 || isInsideFurniture(rv.x, nz)) rv.vz *= -1; else rv.z = nz;
           rv.mesh.position.set(rv.x, 0, rv.z);
           for (const item of roomItems) {
             if (item.cleaned || item.type !== 'floorDust') continue;
             if (Math.hypot(rv.x - item.x, rv.z - item.z) < 0.72) {
-              completeItem(item, item.x, 0.2, item.z, '🤖 자동 흡입', '#0284c7', true); break;
+              completeItem(item, item.x, 0.2, item.z, '🤖 자동 흡입', '#0284c7', true);
+              rv.battery -= 1;
+              if (rv.battery <= 0) { setRoboLed(rv); addFloatPopup3D(rv.x, 0.8, rv.z, '🔋 로봇 방전! 나머지는 직접!', '#dc2626'); }
+              break;
             }
-          }
-          for (let i = droppedTickets.length - 1; i >= 0; i--) {
-            const tk = droppedTickets[i];
-            if (Math.hypot(rv.x - tk.x, rv.z - tk.z) < 0.85) collectTicket(tk, true);
           }
         }
 
@@ -4216,7 +4250,7 @@
                 </div>`;
             }).join('')}</div>
           </div>`;
-        const PRESTIGE_REQ = 10000000; // ₩1,000만 달성 시 명예 은퇴 가능!
+        const PRESTIGE_REQ = 100000000; // ₩1억 달성 시 명예 은퇴 가능!
         const canPrestige = state.wealth >= PRESTIGE_REQ;
         const curBadges = state.prestigeCount || 0;
         const prestigeHtml = `
@@ -4227,12 +4261,12 @@
                   <span>🌟 명예 은퇴 (프레스티지)</span>
                   <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 font-extrabold">보유 배지 ${curBadges}개</span>
                 </div>
-                <p class="text-[11px] text-stone-600 mt-0.5 leading-snug">자산 ₩1,000만을 바쳐 영구 <b>황금 행운 배지(+50% 수익·당첨금)</b>를 얻고 새롭게 시작합니다.</p>
+                <p class="text-[11px] text-stone-600 mt-0.5 leading-snug">자산 ₩1억을 바쳐 영구 <b>황금 행운 배지(+50% 수익·당첨금)</b>를 얻고 새롭게 시작합니다.</p>
               </div>
               <button type="button" data-do-prestige="1"
                 class="shrink-0 px-3 py-2 rounded-xl text-xs font-extrabold transition ${
                   canPrestige ? 'bg-amber-500 hover:bg-amber-400 text-stone-950 shadow' : 'bg-stone-200 text-stone-400 cursor-not-allowed'
-                }">${canPrestige ? '새 출발!' : '₩1,000만'}</button>
+                }">${canPrestige ? '새 출발!' : '₩1억'}</button>
             </div>
           </div>`;
         document.getElementById('panel-wealth').innerHTML = prestigeHtml + decorsHtml + roomsHtml + assetsHtml;
@@ -4380,6 +4414,7 @@
         const btn = e.target.closest('[data-choose-perk]');
         if (!btn) return;
         state.activePerk = btn.dataset.choosePerk;
+        rechargeRoboVacs();
         const pk = PERKS.find(p => p.id === state.activePerk);
         document.getElementById('perk-modal').classList.add('hidden');
         SoundFX.upgrade();
@@ -4460,7 +4495,7 @@
 
       document.getElementById('cam-left-btn').addEventListener('click', () => { targetCamAngle = Math.max(0.2, targetCamAngle - 0.32); });
       document.getElementById('cam-right-btn').addEventListener('click', () => { targetCamAngle = Math.min(1.38, targetCamAngle + 0.32); });
-      document.getElementById('cam-reset-btn').addEventListener('click', () => { targetCamAngle = Math.PI * 0.25; targetCamRadius = 13.8; });
+      document.getElementById('cam-reset-btn').addEventListener('click', () => { targetCamAngle = Math.PI * 0.25; targetCamRadius = camFitRadius; });
 
       document.querySelectorAll('.tool-btn').forEach(btn => btn.addEventListener('click', () => {
         SoundFX.init(); SoundFX.click(); selectTool(btn.dataset.tool);
@@ -4497,7 +4532,7 @@
       document.getElementById('panel-wealth').addEventListener('click', (e) => {
         const presBtn = e.target.closest('[data-do-prestige]');
         if (presBtn) {
-          const REQ = 10000000;
+          const REQ = 100000000;
           if (state.wealth < REQ) {
             shakeBtn(presBtn, REQ - state.wealth);
             return;
@@ -4590,7 +4625,7 @@
         doubleUsed = true;
         const dblBtn = document.getElementById('double-chance-btn');
         dblBtn.classList.add('hidden');
-        const win = Math.random() < 0.5;
+        const win = Math.random() < 0.4;
         if (win) {
           const extra = Math.round(lastWonPrize * 1.2); // total becomes 2.2x!
           state.wealth += extra; state.totalEarned += extra;
@@ -4599,10 +4634,10 @@
           if (typeof confetti === 'function') confetti({ particleCount: 90, spread: 80, origin: { y: 0.55 } });
           showToast(`🔥 2.2배 도전 대성공! +${formatKRW(extra)} 추가 획득!`);
         } else {
-          const refundBack = Math.round(lastWonPrize * 0.65); // keep 35%
+          const refundBack = Math.round(lastWonPrize * 0.8); // keep 20%
           state.wealth = Math.max(0, state.wealth - refundBack);
           SoundFX.error();
-          showToast(`😅 아쉽! 도전 실패로 ${formatKRW(Math.round(lastWonPrize * 0.35))}만 수령했습니다.`);
+          showToast(`😅 아쉽! 도전 실패로 ${formatKRW(Math.round(lastWonPrize * 0.2))}만 수령했습니다.`);
         }
         updateAllUI(); saveState();
       });
